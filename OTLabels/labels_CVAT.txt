@@ -1,0 +1,7 @@
+Cat, CatId
+person, 0
+bicycle, 1
+car, 2
+motorcycle, 3
+bus, 6
+truck, 7

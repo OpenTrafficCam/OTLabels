@@ -1,0 +1,2 @@
+"http://images.cocodataset.org/annotations/image_info_test2017.zip"
+"http://images.cocodataset.org/annotations/annotations_trainval2017.zip"

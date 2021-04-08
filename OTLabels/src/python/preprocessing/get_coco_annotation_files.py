@@ -47,6 +47,6 @@ def _unzip(file, dir):
 
 if __name__ == "__main__":
     path = "D:/OTC/OTLabels/OTLabels/data"
-    URLFile = "D:/OTC/OTLabels/OTLabels/annotation_URLs.txt"
+    URLFile = "D:/OTC/OTLabels/OTLabels/coco_annotation_URLs.txt"
 
     _downloadAnnotations(URLFile, path)
