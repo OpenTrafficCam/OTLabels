@@ -21,7 +21,7 @@ from pathlib import Path
 import shutil
 from pycocotools.coco import COCO
 import pandas as pd
-import os 
+import os
 
 
 def _getCocoCats(catFile, annFile):
@@ -84,7 +84,10 @@ def _copyFilesConvert(annFiles, annPath, labelsCVAT, labelsCOCO, counter):
 
     for f in annFiles:
         fileName = f.split("\\")[-1]
-        fileLabels = pd.read_csv(f, header=None, sep=" ")
+        if os.stat(f).st_size > 0:
+            fileLabels = pd.read_csv(f, header=None, sep=" ")
+        else:
+            continue
         fileLabels[0] = fileLabels[0].map(labelDict)
         fileLabels = fileLabels.dropna()
         fileLabels[0] = fileLabels[0].astype(int)
@@ -117,15 +120,14 @@ def _cvatToCoco(destPath, cvatFile, labelsCVAT, labelsCOCO, name):
         cvatFiles = _fileList(cvatFile, "zip")
         for file in cvatFiles:
             _fileStructure(file, destPath, labelsCVAT, labelsCOCO, name, n)
-            n=+1
+            n = n + 1
 
 
 if __name__ == "__main__":
     destPath = "D:/OTC/OTLabels/OTLabels/data/coco"
     annFile = "D:/OTC/OTLabels/OTLabels/data/coco/annotations/instances_val2017.json"
     catFile = "D:/OTC/OTLabels/OTLabels/labels_CVAT.txt"
-    cvatFile = "C:/Users/MichaelHeilig/Downloads/task_radeberg_fr20_2020-" \
-        "02-20_12-15-00-2021_04_07_16_12_13-yolo 1.1.zip"
+    cvatFile = "C:/Users/MichaelHeilig/Downloads/Radeberg"
     name = "radeberger-00"
 
     labelsCVAT = pd.read_csv(catFile)
