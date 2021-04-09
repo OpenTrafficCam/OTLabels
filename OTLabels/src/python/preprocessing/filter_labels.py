@@ -18,51 +18,78 @@
 # TODO: docstrings in filter_labels
 
 from pathlib import Path
-from shutil import copytree
+from pycocotools.coco import COCO
+import pandas as pd
+import os
 
 
-def _copyFiles(sourcePath, destPath):
-    copytree(sourcePath, destPath)
+def _getCocoCats(catFile, annFile):
+    with open(catFile, "r") as cat:
+        cats = cat.read().splitlines()
+    coco = COCO(annFile)
+    catIds = coco.getCatIds(catNms=cats)
+    labelsCoco = pd.DataFrame(list(zip(cats, catIds)), columns=["Cat", "CatId"])
+    return labelsCoco
 
 
-def _files(path):
-    dir = path.with_suffix("")
-    files = dir.glob("org/obj_train_data/*.txt")
-
-    return files
-
-
-def _readFile(file):
-    with open(file, "r") as f:
-        return f.readlines()
-        
-
-def _filterRows(file, lines, labels=[]):
-    if not isinstance(labels, list):
-        labels = [labels]
-
-    with open(file, "w") as f:
-        for line in lines:
-            label = line.split()[0]
-            if label in labels:
-                f.write(line)
+def _fileList(file, suffix):
+    file = Path(file)
+    dir = file.with_suffix("")
+    if suffix == "":
+        files = dir.glob("*")
+    else:
+        files = dir.glob("*.{}".format(suffix))
+    return [str(file) for file in files]
 
 
-def _filterLabels(labels, path):
-    sourcePath = Path(path)
-    destPath = Path(path + "_org")
+def _filterLabels(labelsFilter, path, name, annFile):
+    sourcePath = path + "/labels/" + name
+    imagePath = path + "/images/" + name
+    destPath = path + "/labels/" + name + "_filtered"
 
-    _copyFiles(sourcePath, destPath)
+    img_type = _fileList(imagePath, "")[0].split("\\")[-1].split(".")[-1].lower()
 
-    sourceFiles = _files(sourcePath)
-    
+    if not Path(destPath).exists():
+        Path(destPath).mkdir()
 
+    labels = _getCocoCats(labelsFilter, annFile)
+    annFiles = _fileList(sourcePath, "txt")
+
+    print("Filter files in \"" + sourcePath + "\" by labels " +
+          ', '.join(str(e) for e in labels["Cat"].tolist()) + "...", end="")
+
+    imageList = []
+    for f in annFiles:
+        fileName = f.split("\\")[-1]
+        imageName = fileName.split(".")[0] + "." + img_type
+        if os.stat(f).st_size > 0:
+            fileLabels = pd.read_csv(f, header=None, sep=" ")
+        else:
+            continue
+        fileLabels = fileLabels[fileLabels[0].isin(labels["CatId"])]
+
+        if len(fileLabels) > 0:
+            fileLabels.to_csv(destPath + "/" + fileName,
+                              header=False,
+                              sep=" ",
+                              index=False,
+                              line_terminator="\n")
+            imageList.append(destPath + "/" + imageName)
+        else:
+            continue
+
+    with open(path + "/" + name + "_filtered.txt", "w") as f:
+        f.write('\n'.join(imageList))
+    print("Done!")
 
 
 if __name__ == "__main__":
-    labels = [0, 1, 2, 5, 7]
-    path = "D:/OTC/OTLabels/OTLabels/data/retraining/Radeberg"
-
-    print("Filter files in \"" + path + "\" by labels " + ', '.join(str(e) for e in labels))
-
-    
+    path = "D:/OTC/OTLabels/OTLabels/data/coco"
+    name = ["train2017", "val2017"]
+    annFile = "D:/OTC/OTLabels/OTLabels/data/coco/annotations/instances_val2017.json"
+    labelsFilter = "D:/OTC/OTLabels/OTLabels/label_filter.txt"
+    if isinstance(name, list):
+        for n in name:
+            _filterLabels(labelsFilter, path, n, annFile)
+    else:
+        _filterLabels(labelsFilter, path, name, annFile)
