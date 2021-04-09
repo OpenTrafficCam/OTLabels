@@ -87,6 +87,7 @@ def _copyFilesConvert(annFiles, annPath, labelsCVAT, labelsCOCO, counter):
         if os.stat(f).st_size > 0:
             fileLabels = pd.read_csv(f, header=None, sep=" ")
         else:
+            shutil.copy(f, annPath + "/" + str(counter) + "_" + fileName)
             continue
         fileLabels[0] = fileLabels[0].map(labelDict)
         fileLabels = fileLabels.dropna()
