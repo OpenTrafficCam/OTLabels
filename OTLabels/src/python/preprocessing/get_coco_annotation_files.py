@@ -22,11 +22,10 @@ import shutil
 import urllib.request
 
 
-def _downloadAnnotations(URLFile, path):
+def _downloadAnnotations(URLFile, cocoPath):
     with open(URLFile, "r") as f:
         URLs = f.readlines()
 
-    cocoPath = path + "/coco"
     if not Path(cocoPath).exists():
         Path(cocoPath).mkdir()
 
@@ -46,7 +45,7 @@ def _unzip(file, dir):
 
 
 if __name__ == "__main__":
-    path = "D:/OTC/OTLabels/OTLabels/data"
+    path = "D:/OTC/OTLabels/OTLabels/data/coco"
     URLFile = "D:/OTC/OTLabels/OTLabels/coco_annotation_json_URLs.txt"
 
     _downloadAnnotations(URLFile, path)
