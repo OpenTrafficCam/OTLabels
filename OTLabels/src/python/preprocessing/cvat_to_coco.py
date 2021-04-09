@@ -35,17 +35,15 @@ def _fileList(file, suffix):
     file = Path(file)
     dir = file.with_suffix("")
     files = dir.glob("obj_train_data/*.{}".format(suffix))
-    return files
+    return [str(file) for file in files]
 
 
 def _unzip(file):
     file = Path(file)
     dir = file.with_suffix("")
     shutil.unpack_archive(file, dir)
-    pngFiles = _fileList(file, "png")
-    txtFiles = _fileList(file, "txt")
-    imageFiles = [str(file) for file in pngFiles]
-    annFiles = [str(file) for file in txtFiles]
+    imageFiles = _fileList(file, "png")
+    annFiles = _fileList(file, "txt")
     return imageFiles, annFiles, dir
 
 
@@ -76,7 +74,7 @@ def _copyFilesConvert(annFiles, annPath, labelsCVAT, labelsCOCO):
 
     for f in annFiles:
         fileName = f.split("\\")[-1]
-        fileLabels = pd.read_fwf(f, header=None, sep=" ")
+        fileLabels = pd.read_csv(f, header=None, sep=" ")
         fileLabels[0] = fileLabels[0].map(labelDict)
         fileLabels = fileLabels.dropna()
         fileLabels[0] = fileLabels[0].astype(int)
