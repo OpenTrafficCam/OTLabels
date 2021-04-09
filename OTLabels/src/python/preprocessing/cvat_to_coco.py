@@ -21,6 +21,7 @@ from pathlib import Path
 import shutil
 from pycocotools.coco import COCO
 import pandas as pd
+import os 
 
 
 def _getCocoCats(catFile, annFile):
@@ -31,10 +32,17 @@ def _getCocoCats(catFile, annFile):
     return labelsCoco
 
 
-def _fileList(file, suffix):
+def _fileListCVAT(file, suffix):
     file = Path(file)
     dir = file.with_suffix("")
     files = dir.glob("obj_train_data/*.{}".format(suffix))
+    return [str(file) for file in files]
+
+
+def _fileList(file, suffix):
+    file = Path(file)
+    dir = file.with_suffix("")
+    files = dir.glob("*.{}".format(suffix))
     return [str(file) for file in files]
 
 
@@ -42,8 +50,8 @@ def _unzip(file):
     file = Path(file)
     dir = file.with_suffix("")
     shutil.unpack_archive(file, dir)
-    imageFiles = _fileList(file, "png")
-    annFiles = _fileList(file, "txt")
+    imageFiles = _fileListCVAT(file, "png")
+    annFiles = _fileListCVAT(file, "txt")
     return imageFiles, annFiles, dir
 
 
@@ -100,7 +108,12 @@ def _fileStructure(cvatFile, destPath, labelsCVAT, labelsCOCO, name):
 def _cvatToCoco(destPath, cvatFile, labelsCVAT, labelsCOCO, name):
     assert len(labelsCVAT) == len(labelsCOCO), "CVAT Labels and COCO Labels differ!"
 
-    _fileStructure(cvatFile, destPath, labelsCVAT, labelsCOCO, name)
+    if os.path.isfile(cvatFile):
+        _fileStructure(cvatFile, destPath, labelsCVAT, labelsCOCO, name)
+    elif os.path.isdir(cvatFile):
+        cvatFiles = _fileList(cvatFile, "zip")
+        for file in cvatFiles:
+            _fileStructure(file, destPath, labelsCVAT, labelsCOCO, name)
 
 
 if __name__ == "__main__":
