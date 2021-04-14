@@ -43,7 +43,7 @@ def _fileList(file, suffix):
     return [str(file) for file in files]
 
 
-def _filterLabels(labelsFilter, path, name, numBackground, sample=1.0, newTrain=False):
+def _filterLabels(labelsFilter, path, name, numBackground, sample=1.0, resetLabelIds=False):
     sourcePath = path + "/labels/" + name
     imagePath = path + "/images/" + name
     destPathLabels = path + "/labels/" + name + "_filtered"
@@ -62,7 +62,7 @@ def _filterLabels(labelsFilter, path, name, numBackground, sample=1.0, newTrain=
     labels = pd.read_csv(labelsFilter)
     annFiles = _fileList(sourcePath, "txt")
 
-    if newTrain:
+    if resetLabelIds:
         labelDict = _resetLabels(labels)
 
     print("Filter files in \"" + sourcePath + "\" by labels " +
@@ -85,7 +85,7 @@ def _filterLabels(labelsFilter, path, name, numBackground, sample=1.0, newTrain=
         fileLabels = fileLabels[fileLabels[0].isin(labels["CatId"])]
 
         if len(fileLabels) > 0:
-            if newTrain:
+            if resetLabelIds:
                 fileLabels[0] = fileLabels[0].map(labelDict)
                 fileLabels = fileLabels.dropna()
                 fileLabels[0] = fileLabels[0].astype(int)
@@ -116,12 +116,12 @@ def _filterLabels(labelsFilter, path, name, numBackground, sample=1.0, newTrain=
 
 if __name__ == "__main__":
     path = "D:/OTC/OTLabels/OTLabels/data/coco"
-    name = ["train2017", "val2017"]
-    sample = [0.1, 1]
+    name = ["radeberger-test"]
+    sample = [1]
     labelsFilter = "D:/OTC/OTLabels/OTLabels/labels_CVAT.txt"
-    numBackground = 500
+    numBackground = [0]
     if isinstance(name, list):
-        for n, s in zip(name, sample):
-            _filterLabels(labelsFilter, path, n, numBackground, s, newTrain=True)
+        for n, s, b in zip(name, sample, numBackground):
+            _filterLabels(labelsFilter, path, n, b, s, resetLabelIds=True)
     else:
-        _filterLabels(labelsFilter, path, name, numBackground, sample, newTrain=True)
+        _filterLabels(labelsFilter, path, name, numBackground, sample, resetLabelIds=True)
