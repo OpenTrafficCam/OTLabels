@@ -18,18 +18,19 @@
 # TODO: docstrings in filter_labels
 
 from pathlib import Path
-from pycocotools.coco import COCO
 import pandas as pd
 import os
+import shutil
+import random
 
 
-def _getCocoCats(catFile, annFile):
-    with open(catFile, "r") as cat:
-        cats = cat.read().splitlines()
-    coco = COCO(annFile)
-    catIds = coco.getCatIds(catNms=cats)
-    labelsCoco = pd.DataFrame(list(zip(cats, catIds)), columns=["Cat", "CatId"])
-    return labelsCoco
+def _resetLabels(labels):
+    labelDict = {}
+    row = 0
+    for i in labels["Cat"]:
+        labelDict.update({labels.loc[labels["Cat"] == i, "CatId"].values[0]: row})
+        row = row + 1
+    return labelDict
 
 
 def _fileList(file, suffix):
@@ -42,54 +43,84 @@ def _fileList(file, suffix):
     return [str(file) for file in files]
 
 
-def _filterLabels(labelsFilter, path, name, annFile):
+def _filterLabels(labelsFilter, path, name, numBlank, newTrain=False, sample=1.0):
     sourcePath = path + "/labels/" + name
     imagePath = path + "/images/" + name
-    destPath = path + "/labels/" + name + "_filtered"
+    destPathLabels = path + "/labels/" + name + "_filtered"
+    destPathImgs = path + "/images/" + name + "_filtered"
 
     img_type = _fileList(imagePath, "")[0].split("\\")[-1].split(".")[-1].lower()
 
-    if not Path(destPath).exists():
-        Path(destPath).mkdir()
+    if Path(destPathLabels).exists():
+        shutil.rmtree(destPathLabels)
+    if Path(destPathImgs).exists():
+        shutil.rmtree(destPathImgs)
 
-    labels = _getCocoCats(labelsFilter, annFile)
+    Path(destPathLabels).mkdir()
+    Path(destPathImgs).mkdir()
+
+    labels = pd.read_csv(labelsFilter)
     annFiles = _fileList(sourcePath, "txt")
+
+    if newTrain:
+        labelDict = _resetLabels(labels)
 
     print("Filter files in \"" + sourcePath + "\" by labels " +
           ', '.join(str(e) for e in labels["Cat"].tolist()) + "...", end="")
 
     imageList = []
+    imageListSource = []
+    n = 0
     for f in annFiles:
+
+        write = random.uniform(0, 1) < sample
+
         fileName = f.split("\\")[-1]
         imageName = fileName.split(".")[0] + "." + img_type
         if os.stat(f).st_size > 0:
             fileLabels = pd.read_csv(f, header=None, sep=" ")
         else:
             continue
+
         fileLabels = fileLabels[fileLabels[0].isin(labels["CatId"])]
 
         if len(fileLabels) > 0:
-            fileLabels.to_csv(destPath + "/" + fileName,
-                              header=False,
-                              sep=" ",
-                              index=False,
-                              line_terminator="\n")
-            imageList.append(destPath + "/" + imageName)
+            if newTrain:
+                fileLabels[0] = fileLabels[0].map(labelDict)
+                fileLabels = fileLabels.dropna()
+                fileLabels[0] = fileLabels[0].astype(int)
+            if write:
+                fileLabels.to_csv(destPathLabels + "/" + fileName,
+                                  header=False,
+                                  sep=" ",
+                                  index=False,
+                                  line_terminator="\n")
+                imageList.append(destPathImgs + "/" + imageName)
+                imageListSource.append(imagePath + "/" + imageName)
         else:
+            if n < numBlank:
+                open(destPathLabels + "/" + fileName, 'a').close()
+                imageList.append(destPathImgs + "/" + imageName)
+                imageListSource.append(imagePath + "/" + imageName)
+            n = n + 1
             continue
 
     with open(path + "/" + name + "_filtered.txt", "w") as f:
         f.write('\n'.join(imageList))
+
+    for img in imageListSource:
+        shutil.copy(img, destPathImgs)
+
     print("Done!")
 
 
 if __name__ == "__main__":
     path = "D:/OTC/OTLabels/OTLabels/data/coco"
     name = ["train2017", "val2017"]
-    annFile = "D:/OTC/OTLabels/OTLabels/data/coco/annotations/instances_val2017.json"
-    labelsFilter = "D:/OTC/OTLabels/OTLabels/label_filter.txt"
+    labelsFilter = "D:/OTC/OTLabels/OTLabels/labels_CVAT.txt"
+    numBlank = 500
     if isinstance(name, list):
         for n in name:
-            _filterLabels(labelsFilter, path, n, annFile)
+            _filterLabels(labelsFilter, path, n, numBlank, newTrain=True, sample=0.08)
     else:
-        _filterLabels(labelsFilter, path, name, annFile)
+        _filterLabels(labelsFilter, path, name, numBlank, newTrain=True, sample=0.2)
