@@ -30,7 +30,7 @@ def _downloadAnnotations(URLFile, cocoPath):
         Path(cocoPath).mkdir()
 
     for URL in URLs:
-        print("Download and unzip annotation files to \"" + cocoPath + "\"")
+        print('Download and unzip annotation files to "' + cocoPath + '"')
 
         annoFile = cocoPath + "/annotations.zip"
         urllib.request.urlretrieve(URL, annoFile)
@@ -45,7 +45,7 @@ def _unzip(file, dir):
 
 
 if __name__ == "__main__":
-    path = "D:/OTC/OTLabels/OTLabels/data/coco"
-    URLFile = "D:/OTC/OTLabels/OTLabels/coco_annotation_json_URLs.txt"
+    path = "OTLabels/data/coco"
+    URLFile = "OTLabels/coco_annotation_json_URLs.txt"
 
     _downloadAnnotations(URLFile, path)
