@@ -43,7 +43,7 @@ def _fileList(file, suffix):
     return [str(file) for file in files]
 
 
-def _filterLabels(labelsFilter, path, name, numBlank, newTrain=False, sample=1.0):
+def _filterLabels(labelsFilter, path, name, numBackground, newTrain=False, sample=1.0):
     sourcePath = path + "/labels/" + name
     imagePath = path + "/images/" + name
     destPathLabels = path + "/labels/" + name + "_filtered"
@@ -98,7 +98,7 @@ def _filterLabels(labelsFilter, path, name, numBlank, newTrain=False, sample=1.0
                 imageList.append(destPathImgs + "/" + imageName)
                 imageListSource.append(imagePath + "/" + imageName)
         else:
-            if n < numBlank:
+            if n < numBackground:
                 open(destPathLabels + "/" + fileName, 'a').close()
                 imageList.append(destPathImgs + "/" + imageName)
                 imageListSource.append(imagePath + "/" + imageName)
@@ -117,10 +117,11 @@ def _filterLabels(labelsFilter, path, name, numBlank, newTrain=False, sample=1.0
 if __name__ == "__main__":
     path = "D:/OTC/OTLabels/OTLabels/data/coco"
     name = ["train2017", "val2017"]
+    sample = [0.08, 1]
     labelsFilter = "D:/OTC/OTLabels/OTLabels/labels_CVAT.txt"
-    numBlank = 500
+    numBackground = 500
     if isinstance(name, list):
-        for n in name:
-            _filterLabels(labelsFilter, path, n, numBlank, newTrain=True, sample=0.08)
+        for n, s in zip(name, sample):
+            _filterLabels(labelsFilter, path, n, numBackground, s, newTrain=True)
     else:
-        _filterLabels(labelsFilter, path, name, numBlank, newTrain=True, sample=0.2)
+        _filterLabels(labelsFilter, path, name, numBackground, sample, newTrain=True)
