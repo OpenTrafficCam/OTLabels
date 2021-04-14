@@ -43,7 +43,7 @@ def _fileList(file, suffix):
     return [str(file) for file in files]
 
 
-def _filterLabels(labelsFilter, path, name, numBackground, newTrain=False, sample=1.0):
+def _filterLabels(labelsFilter, path, name, numBackground, sample=1.0, newTrain=False):
     sourcePath = path + "/labels/" + name
     imagePath = path + "/images/" + name
     destPathLabels = path + "/labels/" + name + "_filtered"
@@ -117,7 +117,7 @@ def _filterLabels(labelsFilter, path, name, numBackground, newTrain=False, sampl
 if __name__ == "__main__":
     path = "D:/OTC/OTLabels/OTLabels/data/coco"
     name = ["train2017", "val2017"]
-    sample = [0.08, 1]
+    sample = [0.1, 1]
     labelsFilter = "D:/OTC/OTLabels/OTLabels/labels_CVAT.txt"
     numBackground = 500
     if isinstance(name, list):
