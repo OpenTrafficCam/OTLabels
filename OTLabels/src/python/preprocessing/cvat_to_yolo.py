@@ -64,23 +64,23 @@ def _copyFiles(sourceFiles, destPath, counter):
         shutil.copy(f, destPath + "\\" + newName)
 
 
-def _createLabelDict(labelsCVAT, labelsCOCO):
-    labels = pd.merge(labelsCVAT, labelsCOCO,
+def _createLabelDict(labelsCVAT, labelsYOLO):
+    labels = pd.merge(labelsCVAT, labelsYOLO,
                       how="inner",
                       on="Cat",
                       suffixes=["_CVAT", "_COCO"])
     labelDict = {}
     for i in labels["Cat"]:
         labelDict.update({labels.loc[labels["Cat"] == i, "CatId_CVAT"].values[0]:
-                          labels.loc[labels["Cat"] == i, "CatId_COCO"].values[0]})
+                          labels.loc[labels["Cat"] == i, "CatId_COCO"].values[0] - 1})
     return labelDict
 
 
-def _copyFilesConvert(annFiles, annPath, labelsCVAT, labelsCOCO, counter):
+def _copyFilesConvert(annFiles, annPath, labelsCVAT, labelsYOLO, counter):
     if not Path(annPath).exists():
         Path(annPath).mkdir()
 
-    labelDict = _createLabelDict(labelsCVAT, labelsCOCO)
+    labelDict = _createLabelDict(labelsCVAT, labelsYOLO)
 
     for f in annFiles:
         fileName = f.split("\\")[-1]
@@ -99,28 +99,28 @@ def _copyFilesConvert(annFiles, annPath, labelsCVAT, labelsCOCO, counter):
                           line_terminator="\n")
 
 
-def _fileStructure(cvatFile, destPath, labelsCVAT, labelsCOCO, name, counter):
+def _fileStructure(cvatFile, destPath, labelsCVAT, labelsYOLO, name, counter):
     imageFiles, annFiles, sourcepath = _unzip(cvatFile)
     imagePath = destPath + "/images/" + name
     annPath = destPath + "/labels/" + name
 
     _copyFiles(imageFiles, imagePath, counter)
 
-    _copyFilesConvert(annFiles, annPath, labelsCVAT, labelsCOCO, counter)
+    _copyFilesConvert(annFiles, annPath, labelsCVAT, labelsYOLO, counter)
     shutil.rmtree(sourcepath)
     return annFiles
 
 
-def _cvatToCoco(destPath, cvatFile, labelsCVAT, labelsCOCO, name):
-    assert len(labelsCVAT) == len(labelsCOCO), "CVAT Labels and COCO Labels differ!"
+def _cvatToYolo(destPath, cvatFile, labelsCVAT, labelsYOLO, name):
+    assert len(labelsCVAT) == len(labelsYOLO), "CVAT Labels and YOLO Labels differ!"
 
     n = 0
     if os.path.isfile(cvatFile):
-        _fileStructure(cvatFile, destPath, labelsCVAT, labelsCOCO, name, n)
+        _fileStructure(cvatFile, destPath, labelsCVAT, labelsYOLO, name, n)
     elif os.path.isdir(cvatFile):
         cvatFiles = _fileList(cvatFile, "zip")
         for file in cvatFiles:
-            _fileStructure(file, destPath, labelsCVAT, labelsCOCO, name, n)
+            _fileStructure(file, destPath, labelsCVAT, labelsYOLO, name, n)
             n = n + 1
 
 
@@ -132,6 +132,6 @@ if __name__ == "__main__":
     name = "radeberger-00"
 
     labelsCVAT = pd.read_csv(catFile)
-    labelsCOCO = _getCocoCats(catFile, annFile)
+    labelsYOLO = _getCocoCats(catFile, annFile)
 
-    _cvatToCoco(destPath, cvatFile, labelsCVAT, labelsCOCO, name)
+    _cvatToYolo(destPath, cvatFile, labelsCVAT, labelsYOLO, name)
