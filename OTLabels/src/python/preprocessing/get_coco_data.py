@@ -39,11 +39,11 @@ def _downloadImages(imageURLs, imagePath):
 
     for URL in URLs:
         if URL[0] == "#":
-            continue 
+            continue
         elif URL[0] != "h":
             print("The provided URL is not valid!")
             continue
-        print("Download and unzip image files to \"" + imagePath + "\"...", end="")
+        print('Download and unzip image files to "' + imagePath + '"...', end="")
         dataVersion = URL.split("/")[-1]
         imageFile = imagePath + "/" + dataVersion
         urllib.request.urlretrieve(URL, imageFile)
@@ -54,7 +54,7 @@ def _downloadImages(imageURLs, imagePath):
 
 
 def _downloadAnnotations(annURL, annPath):
-    print("Download and unzip anotation files to \"" + annPath + "/coco\"...", end="")
+    print('Download and unzip anotation files to "' + annPath + '/coco"...', end="")
     dataVersion = annURL.split("/")[-1]
     annFile = annPath + "/" + dataVersion
     urllib.request.urlretrieve(annURL, annFile)
