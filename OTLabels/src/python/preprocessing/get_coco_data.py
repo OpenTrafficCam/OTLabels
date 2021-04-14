@@ -72,8 +72,8 @@ def _downloadCocoData(imageURLs, annURL, path):
 
 
 if __name__ == "__main__":
-    imageURLs = "D:/OTC/OTLabels/OTLabels/coco_image_URLs.txt"
+    imageURLs = "OTLabels/coco_image_URLs.txt"
     annURL = "https://github.com/ultralytics/yolov5/releases/download/v1.0/coco2017labels.zip"
-    path = "D:/OTC/OTLabels/OTLabels/data"
+    path = "OTLabels/data"
 
     _downloadCocoData(imageURLs, annURL, path)
