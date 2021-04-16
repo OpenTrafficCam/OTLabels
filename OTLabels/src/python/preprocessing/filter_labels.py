@@ -43,11 +43,11 @@ def _fileList(file, suffix):
     return [str(file) for file in files]
 
 
-def _filterLabels(labelsFilter, path, name, numBackground, sample=1.0, resetLabelIds=False):
+def _filterLabels(labelsFilter, path, name, appendix, numBackground, sample=1.0, resetLabelIds=False):
     sourcePath = path + "/labels/" + name
     imagePath = path + "/images/" + name
-    destPathLabels = path + "/labels/" + name + "_filtered"
-    destPathImgs = path + "/images/" + name + "_filtered"
+    destPathLabels = path + "/labels/" + name + "_filtered_" + appendix
+    destPathImgs = path + "/images/" + name + "_filtered_" + appendix
 
     img_type = _fileList(imagePath, "")[0].split("\\")[-1].split(".")[-1].lower()
 
@@ -105,7 +105,7 @@ def _filterLabels(labelsFilter, path, name, numBackground, sample=1.0, resetLabe
             n = n + 1
             continue
 
-    with open(path + "/" + name + "_filtered.txt", "w") as f:
+    with open(path + "/" + name + "_filtered_" + appendix + ".txt", "w") as f:
         f.write('\n'.join(imageList))
 
     for img in imageListSource:
@@ -116,12 +116,15 @@ def _filterLabels(labelsFilter, path, name, numBackground, sample=1.0, resetLabe
 
 if __name__ == "__main__":
     path = "D:/OTC/OTLabels/OTLabels/data/coco"
-    name = ["radeberger-test"]
-    sample = [1]
+    name = ["train2017", "val2017"]
+    sample = [0.1, 0.5]
     labelsFilter = "D:/OTC/OTLabels/OTLabels/labels_CVAT.txt"
-    numBackground = [0]
+    numBackground = [500, 0]
     if isinstance(name, list):
         for n, s, b in zip(name, sample, numBackground):
-            _filterLabels(labelsFilter, path, n, b, s, resetLabelIds=True)
+            appendix = str(s)
+            _filterLabels(labelsFilter, path, n, appendix, b, s, resetLabelIds=True)
     else:
-        _filterLabels(labelsFilter, path, name, numBackground, sample, resetLabelIds=True)
+        appendix = str(sample)
+        _filterLabels(labelsFilter, path, name, appendix, 
+                      numBackground, sample, resetLabelIds=True)
