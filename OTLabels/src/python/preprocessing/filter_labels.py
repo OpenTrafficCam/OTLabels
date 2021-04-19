@@ -22,6 +22,7 @@ import pandas as pd
 import os
 import shutil
 import random
+import progressbar
 
 
 def _resetLabels(labels):
@@ -43,7 +44,9 @@ def _fileList(file, suffix):
     return [str(file) for file in files]
 
 
-def _filterLabels(labelsFilter, path, name, appendix, numBackground, sample=1.0, resetLabelIds=False):
+def _filterLabels(
+    labelsFilter, path, name, appendix, numBackground, sample=1.0, resetLabelIds=False
+):
     sourcePath = path + "/labels/" + name
     imagePath = path + "/images/" + name
     destPathLabels = path + "/labels/" + name + "_filtered_" + appendix
@@ -65,13 +68,19 @@ def _filterLabels(labelsFilter, path, name, appendix, numBackground, sample=1.0,
     if resetLabelIds:
         labelDict = _resetLabels(labels)
 
-    print("Filter files in \"" + sourcePath + "\" by labels " +
-          ', '.join(str(e) for e in labels["Cat"].tolist()) + "...", end="")
+    print(
+        'Filter files in "'
+        + sourcePath
+        + '" by labels '
+        + ", ".join(str(e) for e in labels["Cat"].tolist())
+        + "...",
+        end="",
+    )
 
     imageList = []
     imageListSource = []
     n = 0
-    for f in annFiles:
+    for f in progressbar.progressbar(annFiles):
 
         write = random.uniform(0, 1) < sample
 
@@ -90,23 +99,25 @@ def _filterLabels(labelsFilter, path, name, appendix, numBackground, sample=1.0,
                 fileLabels = fileLabels.dropna()
                 fileLabels[0] = fileLabels[0].astype(int)
             if write:
-                fileLabels.to_csv(destPathLabels + "/" + fileName,
-                                  header=False,
-                                  sep=" ",
-                                  index=False,
-                                  line_terminator="\n")
+                fileLabels.to_csv(
+                    destPathLabels + "/" + fileName,
+                    header=False,
+                    sep=" ",
+                    index=False,
+                    line_terminator="\n",
+                )
                 imageList.append(destPathImgs + "/" + imageName)
                 imageListSource.append(imagePath + "/" + imageName)
         else:
             if n < numBackground:
-                open(destPathLabels + "/" + fileName, 'a').close()
+                open(destPathLabels + "/" + fileName, "a").close()
                 imageList.append(destPathImgs + "/" + imageName)
                 imageListSource.append(imagePath + "/" + imageName)
             n = n + 1
             continue
 
     with open(path + "/" + name + "_filtered_" + appendix + ".txt", "w") as f:
-        f.write('\n'.join(imageList))
+        f.write("\n".join(imageList))
 
     for img in imageListSource:
         shutil.copy(img, destPathImgs)
@@ -115,16 +126,23 @@ def _filterLabels(labelsFilter, path, name, appendix, numBackground, sample=1.0,
 
 
 if __name__ == "__main__":
-    path = "D:/OTC/OTLabels/OTLabels/data/coco"
+    path = "./OTLabels/data/coco"
     name = ["train2017", "val2017"]
-    sample = [0.1, 0.5]
-    labelsFilter = "D:/OTC/OTLabels/OTLabels/labels_CVAT.txt"
-    numBackground = [500, 0]
+    sample = [1, 1]
+    labelsFilter = "./OTLabels/labels_CVAT.txt"
+    numBackground = [1500, 0]
     if isinstance(name, list):
         for n, s, b in zip(name, sample, numBackground):
             appendix = str(s)
             _filterLabels(labelsFilter, path, n, appendix, b, s, resetLabelIds=True)
     else:
         appendix = str(sample)
-        _filterLabels(labelsFilter, path, name, appendix, 
-                      numBackground, sample, resetLabelIds=True)
+        _filterLabels(
+            labelsFilter,
+            path,
+            name,
+            appendix,
+            numBackground,
+            sample,
+            resetLabelIds=True,
+        )
