@@ -36,6 +36,7 @@ def _resetLabels(labels):
 
 def _fileList(file, suffix):
     file = Path(file)
+    print('Reading "{file}\\*{suffix}" files...'.format(file=file, suffix=suffix))
     dir = file.with_suffix("")
     if suffix == "":
         files = dir.glob("*")
@@ -74,7 +75,6 @@ def _filterLabels(
         + '" by labels '
         + ", ".join(str(e) for e in labels["Cat"].tolist())
         + "...",
-        end="",
     )
 
     imageList = []
@@ -116,9 +116,17 @@ def _filterLabels(
             n = n + 1
             continue
 
-    with open(path + "/" + name + "_filtered_" + appendix + ".txt", "w") as f:
+    file_filteredlabels = path + "/" + name + "_filtered_" + appendix + ".txt"
+    print(
+        "Writing file with filtered labels to {path} ...".format(
+            path=file_filteredlabels
+        )
+    )
+
+    with open(file_filteredlabels, "w") as f:
         f.write("\n".join(imageList))
 
+    print("Coping images to {path} ...".format(path=destPathImgs))
     for img in imageListSource:
         shutil.copy(img, destPathImgs)
 
