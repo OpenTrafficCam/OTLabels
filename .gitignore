@@ -1,2 +1,4 @@
 /OTLabels/data/*
 *.pyc
+/yolov5/*
+/runs/*
