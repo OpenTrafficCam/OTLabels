@@ -4,7 +4,7 @@
     "python.linting.flake8Enabled": true,
     "python.linting.enabled": true,
     "python.analysis.extraPaths": [
-        "./OTLabels"
+        "./yolov5"
     ],
     "python.languageServer": "Pylance",
 }
