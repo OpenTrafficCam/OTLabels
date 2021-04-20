@@ -2,3 +2,5 @@
 *.pyc
 /yolov5/*
 /runs/*
+yolov5*.pt
+launch.json
