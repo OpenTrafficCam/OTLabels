@@ -140,10 +140,10 @@ def _filterLabels(
 
 if __name__ == "__main__":
     path = "./OTLabels/data/coco"
-    name = ["val2017"]
-    sample = [1]
     labelsFilter = "./OTLabels/labels_CVAT.txt"
-    numBackground = [0]
+    name = ["train2017", "val2017"]
+    sample = [1, 1]
+    numBackground = [1500, 100]
     if isinstance(name, list):
         for n, s, b in zip(name, sample, numBackground):
             appendix = str(s) + "_6cl"
