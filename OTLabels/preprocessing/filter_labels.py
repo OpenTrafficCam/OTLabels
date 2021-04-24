@@ -141,6 +141,7 @@ def _filterLabels(
 if __name__ == "__main__":
     path = "./OTLabels/data/coco"
     labelsFilter = "./OTLabels/labels_CVAT.txt"
+    # TODO: #14 read name, sample and background from config file
     name = ["train2017", "val2017"]
     sample = [1, 1]
     numBackground = [1500, 100]
