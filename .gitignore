@@ -1,2 +1,7 @@
-/OTLabels/data/*
+/data/*
 *.pyc
+/yolov5/*
+/runs/*
+/wandb/*
+*.pt
+launch.json

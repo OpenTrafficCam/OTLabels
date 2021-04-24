@@ -52,6 +52,7 @@ def _filterLabels(
     imagePath = path + "/images/" + name
     destPathLabels = path + "/labels/" + name + "_filtered_" + appendix
     destPathImgs = path + "/images/" + name + "_filtered_" + appendix
+    destPathImgsRel = "./images/" + name + "_filtered_" + appendix
 
     img_type = _fileList(imagePath, "")[0].split("\\")[-1].split(".")[-1].lower()
 
@@ -106,12 +107,12 @@ def _filterLabels(
                     index=False,
                     line_terminator="\n",
                 )
-                imageList.append(destPathImgs + "/" + imageName)
+                imageList.append(destPathImgsRel + "/" + imageName)
                 imageListSource.append(imagePath + "/" + imageName)
         else:
             if n < numBackground:
                 open(destPathLabels + "/" + fileName, "a").close()
-                imageList.append(destPathImgs + "/" + imageName)
+                imageList.append(destPathImgsRel + "/" + imageName)
                 imageListSource.append(imagePath + "/" + imageName)
             n = n + 1
             continue
@@ -126,7 +127,11 @@ def _filterLabels(
     with open(file_filteredlabels, "w") as f:
         f.write("\n".join(imageList))
 
-    print("Coping images to {path} ...".format(path=destPathImgs))
+    print(
+        "Copying {num_imgs} images to {path} ...".format(
+            num_imgs=len(imageList), path=destPathImgs
+        )
+    )
     for img in imageListSource:
         shutil.copy(img, destPathImgs)
 
@@ -135,14 +140,14 @@ def _filterLabels(
 
 if __name__ == "__main__":
     path = "./OTLabels/data/coco"
-    name = ["train2017", "val2017"]
-    sample = [1, 1]
+    name = ["val2017"]
+    sample = [1]
     labelsFilter = "./OTLabels/labels_CVAT.txt"
-    numBackground = [1500, 0]
+    numBackground = [0]
     if isinstance(name, list):
         for n, s, b in zip(name, sample, numBackground):
-            appendix = str(s)
-            _filterLabels(labelsFilter, path, n, appendix, b, s, resetLabelIds=True)
+            appendix = str(s) + "_6cl"
+            _filterLabels(labelsFilter, path, n, appendix, b, s, resetLabelIds=False)
     else:
         appendix = str(sample)
         _filterLabels(

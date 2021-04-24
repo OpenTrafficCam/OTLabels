@@ -25,7 +25,7 @@ import os
 
 
 def _getCocoCats(catFile, annFile):
-    cats = pd.read_csv(catFile)['Cat'].tolist()
+    cats = pd.read_csv(catFile)["Cat"].tolist()
     coco = COCO(annFile)
     catIds = coco.getCatIds(catNms=cats)
     labelsCoco = pd.DataFrame(list(zip(cats, catIds)), columns=["Cat", "CatId"])
@@ -65,14 +65,19 @@ def _copyFiles(sourceFiles, destPath, counter):
 
 
 def _createLabelDict(labelsCVAT, labelsYOLO):
-    labels = pd.merge(labelsCVAT, labelsYOLO,
-                      how="inner",
-                      on="Cat",
-                      suffixes=["_CVAT", "_COCO"])
+    labels = pd.merge(
+        labelsCVAT, labelsYOLO, how="inner", on="Cat", suffixes=["_CVAT", "_COCO"]
+    )
     labelDict = {}
     for i in labels["Cat"]:
-        labelDict.update({labels.loc[labels["Cat"] == i, "CatId_CVAT"].values[0]:
-                          labels.loc[labels["Cat"] == i, "CatId_COCO"].values[0] - 1})
+        labelDict.update(
+            {
+                labels.loc[labels["Cat"] == i, "CatId_CVAT"]
+                .values[0]: labels.loc[labels["Cat"] == i, "CatId_COCO"]
+                .values[0]
+                - 1
+            }
+        )
     return labelDict
 
 
@@ -92,11 +97,13 @@ def _copyFilesConvert(annFiles, annPath, labelsCVAT, labelsYOLO, counter):
         fileLabels[0] = fileLabels[0].map(labelDict)
         fileLabels = fileLabels.dropna()
         fileLabels[0] = fileLabels[0].astype(int)
-        fileLabels.to_csv(annPath + "/" + str(counter) + "_" + fileName,
-                          header=False,
-                          sep=" ",
-                          index=False,
-                          line_terminator="\n")
+        fileLabels.to_csv(
+            annPath + "/" + str(counter) + "_" + fileName,
+            header=False,
+            sep=" ",
+            index=False,
+            line_terminator="\n",
+        )
 
 
 def _fileStructure(cvatFile, destPath, labelsCVAT, labelsYOLO, name, counter):
