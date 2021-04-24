@@ -1,6 +1,7 @@
 tqdm==4.55.1
 pandas==1.2.4
 pycocotools==2.0.2
+wandb
 
 -f https://download.pytorch.org/whl/torch_stable.html
 torch==1.8.1+cu111
