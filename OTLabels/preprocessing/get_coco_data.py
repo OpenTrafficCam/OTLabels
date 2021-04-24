@@ -43,7 +43,7 @@ def _downloadImages(imageURLs, imagePath):
         elif URL[0] != "h":
             print("The provided URL is not valid!")
             continue
-        print('Download and unzip image files to "' + imagePath + '"...', end="")
+        print('Download and unzip image files to "' + imagePath + '"...')
         dataVersion = URL.split("/")[-1]
         imageFile = imagePath + "/" + dataVersion
         urllib.request.urlretrieve(URL, imageFile)
@@ -53,11 +53,20 @@ def _downloadImages(imageURLs, imagePath):
         print("Done!")
 
 
-def _downloadAnnotations(annURL, annPath):
-    print('Download and unzip anotation files to "' + annPath + '/coco"...', end="")
-    dataVersion = annURL.split("/")[-1]
+def _downloadAnnotations(annURLs, annPath):
+    with open(annURLs, "r") as f:
+        URLs = f.read().splitlines()
+
+    for URL in URLs:
+        if URL[0] == "#":
+            continue
+        elif URL[0] != "h":
+            print("The provided URL is not valid!")
+            continue
+    print('Download and unzip annotation files to "' + annPath + '/coco"...')
+    dataVersion = URL.split("/")[-1]
     annFile = annPath + "/" + dataVersion
-    urllib.request.urlretrieve(annURL, annFile)
+    urllib.request.urlretrieve(URL, annFile)
 
     _unzip(annFile, annPath)
 
@@ -73,7 +82,7 @@ def _downloadCocoData(imageURLs, annURL, path):
 
 if __name__ == "__main__":
     imageURLs = "OTLabels/coco_image_URLs.txt"
-    annURL = "https://github.com/ultralytics/yolov5/releases/download/v1.0/coco2017labels.zip"
+    annURL = "OTLabels/coco_annotation_URLs.txt"
     path = "OTLabels/data"
 
     _downloadCocoData(imageURLs, annURL, path)
