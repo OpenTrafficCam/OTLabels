@@ -22,7 +22,7 @@ import pandas as pd
 import os
 import shutil
 import random
-import progressbar
+from tqdm import tqdm
 
 
 def _resetLabels(labels):
@@ -81,7 +81,7 @@ def _filterLabels(
     imageList = []
     imageListSource = []
     n = 0
-    for f in progressbar.progressbar(annFiles):
+    for f in tqdm(annFiles):
 
         write = random.uniform(0, 1) < sample
 
