@@ -148,7 +148,7 @@ if __name__ == "__main__":
     if isinstance(name, list):
         for n, s, b in zip(name, sample, numBackground):
             appendix = str(s) + "_6cl"
-            _filterLabels(labelsFilter, path, n, appendix, b, s, resetLabelIds=False)
+            _filterLabels(labelsFilter, path, n, appendix, b, s, resetLabelIds=True)
     else:
         appendix = str(sample)
         _filterLabels(
