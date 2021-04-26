@@ -132,7 +132,7 @@ def _filterLabels(
             num_imgs=len(imageList), path=destPathImgs
         )
     )
-    for img in imageListSource:
+    for img in tqdm(imageListSource):
         shutil.copy(img, destPathImgs)
 
     print("Done!")
