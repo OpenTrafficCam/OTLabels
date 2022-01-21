@@ -1,0 +1,7 @@
+tqdm==4.55.1
+pandas==1.2.4
+pycocotools==2.0.2
+wandb
+
+torch==1.9.0
+torchvision==0.10.0
