@@ -13,8 +13,12 @@ custom: Custom dataset.
 
 So an example of a model name could be as follows:
 
-yolov5m_pretrained_trained_COCO6cls_retrain_custom
-yolov5m_untrained_trained_COCO6cls_retrain_custom
+yolov5-s_COCO6cls
+yolov5-s_pretrainedCOCO_COCO6cls
+
+yolov5-m_COCO6cls
+yolov5-m_pretrainedCOCO_COCO6cls
+
 """
 
 import wandb
