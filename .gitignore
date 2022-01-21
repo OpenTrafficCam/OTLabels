@@ -7,4 +7,5 @@
 launch.json
 
 /venv
+/.venv
 /OTLabels/data/coco
