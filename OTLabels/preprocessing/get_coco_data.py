@@ -35,7 +35,7 @@ def _downloadImages(imageURLs, imagePath):
         URLs = f.read().splitlines()
 
     if not Path(imagePath).exists():
-        Path(imagePath).mkdir()
+        Path(imagePath).mkdir(parents=True)
 
     for URL in URLs:
         if URL[0] == "#":
@@ -43,9 +43,9 @@ def _downloadImages(imageURLs, imagePath):
         elif URL[0] != "h":
             print("The provided URL is not valid!")
             continue
-        print('Download and unzip image files to "' + imagePath + '"...')
+        print('Download and unzip image files to "' + str(imagePath) + '"...')
         dataVersion = URL.split("/")[-1]
-        imageFile = imagePath + "/" + dataVersion
+        imageFile = Path(imagePath, dataVersion)
         urllib.request.urlretrieve(URL, imageFile)
 
         _unzip(imageFile, imagePath)
@@ -63,9 +63,9 @@ def _downloadAnnotations(annURLs, annPath):
         elif URL[0] != "h":
             print("The provided URL is not valid!")
             continue
-    print('Download and unzip annotation files to "' + annPath + '/coco"...')
+    print('Download and unzip annotation files to "' + str(annPath) + '/coco"...')
     dataVersion = URL.split("/")[-1]
-    annFile = annPath + "/" + dataVersion
+    annFile = Path(annPath, dataVersion)
     urllib.request.urlretrieve(URL, annFile)
 
     _unzip(annFile, annPath)
@@ -73,8 +73,8 @@ def _downloadAnnotations(annURLs, annPath):
     print("Done!")
 
 
-def _downloadCocoData(imageURLs, annURL, path):
-    imagePath = path + "/coco/images"
+def main(imageURLs, annURL, path, force_download=False):
+    imagePath = Path(path, "coco/images")
 
     _downloadAnnotations(annURL, path)
     _downloadImages(imageURLs, imagePath)
@@ -84,5 +84,4 @@ if __name__ == "__main__":
     imageURLs = "OTLabels/coco_image_URLs.txt"
     annURL = "OTLabels/coco_annotation_URLs.txt"
     path = "OTLabels/data"
-
-    _downloadCocoData(imageURLs, annURL, path)
+    main(imageURLs, annURL, path)
