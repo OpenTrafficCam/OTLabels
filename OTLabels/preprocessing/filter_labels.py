@@ -45,24 +45,32 @@ def _fileList(file, suffix):
     return [str(file) for file in files]
 
 
-def _filterLabels(
-    labelsFilter, path, name, appendix, numBackground, sample=1.0, resetLabelIds=False
+def _filter_labels(
+    labelsFilter,
+    path,
+    name,
+    appendix,
+    numBackground,
+    sample=1.0,
+    resetLabelIds=False,
 ):
-    sourcePath = path + "/labels/" + name
-    imagePath = path + "/images/" + name
-    destPathLabels = path + "/labels/" + name + "_filtered_" + appendix
-    destPathImgs = path + "/images/" + name + "_filtered_" + appendix
-    destPathImgsRel = "./images/" + name + "_filtered_" + appendix
+    sourcePath = Path(path, "labels/" + name)
+    imagePath = Path(path, "images/" + name)
+    destPathLabels = Path(path, "labels/" + name + "_filtered_" + appendix)
+    destPathImgs = Path(path, "images/" + name + "_filtered_" + appendix)
+    destPathImgsRelative = "./images/" + name + "_filtered_" + appendix
 
-    img_type = _fileList(imagePath, "")[0].split("\\")[-1].split(".")[-1].lower()
+    # TODO: Path(_file_list(image_path, "")[0].suffix)
+    imgType = Path(_fileList(imagePath, "")[0]).suffix.lower()
 
+    # Remove existing filtered data
     if Path(destPathLabels).exists():
         shutil.rmtree(destPathLabels)
     if Path(destPathImgs).exists():
         shutil.rmtree(destPathImgs)
 
-    Path(destPathLabels).mkdir()
-    Path(destPathImgs).mkdir()
+    Path(destPathLabels).mkdir(parents=True)
+    Path(destPathImgs).mkdir(parents=True)
 
     labels = pd.read_csv(labelsFilter)
     annFiles = _fileList(sourcePath, "txt")
@@ -72,7 +80,7 @@ def _filterLabels(
 
     print(
         'Filter files in "'
-        + sourcePath
+        + str(sourcePath)
         + '" by labels '
         + ", ".join(str(e) for e in labels["Cat"].tolist())
         + "...",
@@ -85,8 +93,8 @@ def _filterLabels(
 
         write = random.uniform(0, 1) < sample
 
-        fileName = f.split("\\")[-1]
-        imageName = fileName.split(".")[0] + "." + img_type
+        fileName = Path(f).name
+        imageName = Path(fileName).stem + imgType
         if os.stat(f).st_size > 0:
             fileLabels = pd.read_csv(f, header=None, sep=" ")
         else:
@@ -101,23 +109,23 @@ def _filterLabels(
                 fileLabels[0] = fileLabels[0].astype(int)
             if write:
                 fileLabels.to_csv(
-                    destPathLabels + "/" + fileName,
+                    Path(destPathLabels, fileName),
                     header=False,
                     sep=" ",
                     index=False,
                     line_terminator="\n",
                 )
-                imageList.append(destPathImgsRel + "/" + imageName)
-                imageListSource.append(imagePath + "/" + imageName)
+                imageList.append(str(Path(destPathImgsRelative, imageName)))
+                imageListSource.append(str(Path(imagePath, imageName)))
         else:
             if n < numBackground:
-                open(destPathLabels + "/" + fileName, "a").close()
-                imageList.append(destPathImgsRel + "/" + imageName)
-                imageListSource.append(imagePath + "/" + imageName)
+                open(Path(destPathLabels, fileName), "a").close()  # NOTE: Reason?
+                imageList.append(str(Path(destPathImgsRelative, imageName)))
+                imageListSource.append(str(Path(imagePath, imageName)))
             n = n + 1
             continue
 
-    file_filteredlabels = path + "/" + name + "_filtered_" + appendix + ".txt"
+    file_filteredlabels = Path(path, name + "_filtered_" + appendix + ".txt")
     print(
         "Writing file with filtered labels to {path} ...".format(
             path=file_filteredlabels
