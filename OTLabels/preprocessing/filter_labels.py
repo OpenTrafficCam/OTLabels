@@ -25,16 +25,16 @@ import random
 from tqdm import tqdm
 
 
-def _resetLabels(labels):
-    labelDict = {}
+def _reset_labels(labels):
+    label_dict = {}
     row = 0
     for i in labels["Cat"]:
-        labelDict.update({labels.loc[labels["Cat"] == i, "CatId"].values[0]: row})
+        label_dict.update({labels.loc[labels["Cat"] == i, "CatId"].values[0]: row})
         row = row + 1
-    return labelDict
+    return label_dict
 
 
-def _fileList(file, suffix):
+def _file_list(file, suffix):
     file = Path(file)
     print('Reading "{file}\\*{suffix}" files...'.format(file=file, suffix=suffix))
     dir = file.with_suffix("")
@@ -46,109 +46,106 @@ def _fileList(file, suffix):
 
 
 def _filter_labels(
-    labelsFilter,
+    labels_filter,
     path,
     name,
     appendix,
-    numBackground,
+    num_background,
     sample=1.0,
-    resetLabelIds=False,
+    reset_label_ids=False,
 ):
-    sourcePath = Path(path, "labels/" + name)
-    imagePath = Path(path, "images/" + name)
-    destPathLabels = Path(path, "labels/" + name + "_filtered_" + appendix)
-    destPathImgs = Path(path, "images/" + name + "_filtered_" + appendix)
-    destPathImgsRelative = "./images/" + name + "_filtered_" + appendix
+    source_path = Path(path, "labels/" + name)
+    image_path = Path(path, "images/" + name)
+    dest_path_labels = Path(path, "labels/" + name + "_filtered_" + appendix)
+    dest_path_imgs = Path(path, "images/" + name + "_filtered_" + appendix)
+    dest_path_imgs_relative = "./images/" + name + "_filtered_" + appendix
 
-    # TODO: Path(_file_list(image_path, "")[0].suffix)
-    imgType = Path(_fileList(imagePath, "")[0]).suffix.lower()
+    img_type = Path(_file_list(image_path, "")[0]).suffix.lower()
 
     # Remove existing filtered data
-    if Path(destPathLabels).exists():
-        shutil.rmtree(destPathLabels)
-    if Path(destPathImgs).exists():
-        shutil.rmtree(destPathImgs)
+    if Path(dest_path_labels).exists():
+        shutil.rmtree(dest_path_labels)
+    if Path(dest_path_imgs).exists():
+        shutil.rmtree(dest_path_imgs)
 
-    Path(destPathLabels).mkdir(parents=True)
-    Path(destPathImgs).mkdir(parents=True)
+    Path(dest_path_labels).mkdir(parents=True)
+    Path(dest_path_imgs).mkdir(parents=True)
 
-    labels = pd.read_csv(labelsFilter)
-    annFiles = _fileList(sourcePath, "txt")
+    labels = pd.read_csv(labels_filter)
+    ann_files = _file_list(source_path, "txt")
 
-    if resetLabelIds:
-        labelDict = _resetLabels(labels)
+    if reset_label_ids:
+        label_dict = _reset_labels(labels)
 
     print(
         'Filter files in "'
-        + str(sourcePath)
+        + str(source_path)
         + '" by labels '
         + ", ".join(str(e) for e in labels["Cat"].tolist())
         + "...",
     )
 
-    imageList = []
-    imageListSource = []
+    image_list = []
+    image_list_source = []
     n = 0
-    for f in tqdm(annFiles):
+    for f in tqdm(ann_files):
 
         write = random.uniform(0, 1) < sample
 
-        fileName = Path(f).name
-        imageName = Path(fileName).stem + imgType
+        file_name = Path(f).name
+        image_name = Path(file_name).stem + img_type
         if os.stat(f).st_size > 0:
-            fileLabels = pd.read_csv(f, header=None, sep=" ")
+            file_labels = pd.read_csv(f, header=None, sep=" ")
         else:
             continue
 
-        fileLabels = fileLabels[fileLabels[0].isin(labels["CatId"])]
+        file_labels = file_labels[file_labels[0].isin(labels["CatId"])]
 
-        if len(fileLabels) > 0:
-            if resetLabelIds:
-                fileLabels[0] = fileLabels[0].map(labelDict)
-                fileLabels = fileLabels.dropna()
-                fileLabels[0] = fileLabels[0].astype(int)
+        if len(file_labels) > 0:
+            if reset_label_ids:
+                file_labels[0] = file_labels[0].map(label_dict)
+                file_labels = file_labels.dropna()
+                file_labels[0] = file_labels[0].astype(int)
             if write:
-                fileLabels.to_csv(
-                    Path(destPathLabels, fileName),
+                file_labels.to_csv(
+                    Path(dest_path_labels, file_name),
                     header=False,
                     sep=" ",
                     index=False,
                     line_terminator="\n",
                 )
-                imageList.append(str(Path(destPathImgsRelative, imageName)))
-                imageListSource.append(str(Path(imagePath, imageName)))
+                image_list.append(str(Path(dest_path_imgs_relative, image_name)))
+                image_list_source.append(str(Path(image_path, image_name)))
         else:
-            if n < numBackground:
-                open(Path(destPathLabels, fileName), "a").close()  # NOTE: Reason?
-                imageList.append(str(Path(destPathImgsRelative, imageName)))
-                imageListSource.append(str(Path(imagePath, imageName)))
+            if n < num_background:
+                open(Path(dest_path_labels, file_name), "a").close()  # NOTE: Reason?
+                image_list.append(str(Path(dest_path_imgs_relative, image_name)))
+                image_list_source.append(str(Path(image_path, image_name)))
             n = n + 1
             continue
 
-    file_filteredlabels = Path(path, name + "_filtered_" + appendix + ".txt")
+    file_filtered_labels = Path(path, name + "_filtered_" + appendix + ".txt")
     print(
         "Writing file with filtered labels to {path} ...".format(
-            path=file_filteredlabels
+            path=file_filtered_labels
         )
     )
 
-    with open(file_filteredlabels, "w") as f:
-        f.write("\n".join(imageList))
+    with open(file_filtered_labels, "w") as f:
+        f.write("\n".join(image_list))
 
     print(
         "Copying {num_imgs} images to {path} ...".format(
-            num_imgs=len(imageList), path=destPathImgs
+            num_imgs=len(image_list), path=dest_path_imgs
         )
     )
-    for img in tqdm(imageListSource):
-        shutil.copy(img, destPathImgs)
+    for img in tqdm(image_list_source):
+        shutil.copy(img, dest_path_imgs)
 
     print("Done!")
 
 
-if __name__ == "__main__":
-    path = "./OTLabels/data/coco"
-    labelsFilter = "./OTLabels/labels_CVAT.txt"
+def main(path, labelsFilter):
     # TODO: #14 read name, sample and background from config file
     name = ["train2017", "val2017"]
     sample = [1, 1]
@@ -156,15 +153,21 @@ if __name__ == "__main__":
     if isinstance(name, list):
         for n, s, b in zip(name, sample, numBackground):
             appendix = str(s) + "_6cl"
-            _filterLabels(labelsFilter, path, n, appendix, b, s, resetLabelIds=True)
+            _filter_labels(labelsFilter, path, n, appendix, b, s, reset_label_ids=True)
     else:
         appendix = str(sample)
-        _filterLabels(
+        _filter_labels(
             labelsFilter,
             path,
             name,
             appendix,
             numBackground,
             sample,
-            resetLabelIds=True,
+            reset_label_ids=True,
         )
+
+
+if __name__ == "__main__":
+    path = "./OTLabels/data/coco"
+    labelsFilter = "./OTLabels/labels_CVAT.txt"
+    main(path, labelsFilter)
