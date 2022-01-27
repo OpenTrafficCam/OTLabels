@@ -30,7 +30,7 @@ def _unzip(file, dir=""):
     Path.unlink(file)
 
 
-def _downloadImages(imageURLs, imagePath):
+def _download_images(imageURLs, imagePath):
     with open(imageURLs, "r") as f:
         URLs = f.read().splitlines()
 
@@ -53,22 +53,29 @@ def _downloadImages(imageURLs, imagePath):
         print("Done!")
 
 
-def _downloadAnnotations(annURLs, annPath):
-    with open(annURLs, "r") as f:
+def _download_annotations(ann_urls, ann_path):
+    if not Path(ann_path).exists() and Path(ann_path).is_dir():
+        Path(ann_path).mkdir(parents=True)
+
+    with open(ann_urls, "r") as f:
         URLs = f.read().splitlines()
 
     for URL in URLs:
-        if URL[0] == "#":
+        if URL[0] == "#":  # NOTE: Why?? What is checked here
             continue
         elif URL[0] != "h":
+            # TODO: check if it's starts with h as in http but better to use starts with
+            # or some regex to check if the whole URL exists
             print("The provided URL is not valid!")
             continue
-    print('Download and unzip annotation files to "' + str(annPath) + '/coco"...')
+        # NOTE: No break condition if not valid URL
+
+    print('Download and unzip annotation files to "' + str(ann_path) + "...")
     dataVersion = URL.split("/")[-1]
-    annFile = Path(annPath, dataVersion)
+    annFile = Path(ann_path, dataVersion)
     urllib.request.urlretrieve(URL, annFile)
 
-    _unzip(annFile, annPath)
+    _unzip(annFile, ann_path)
 
     print("Done!")
 
@@ -88,7 +95,7 @@ def main(image_urls, ann_url, save_path, force_download=False):
 
 
 if __name__ == "__main__":
-    imageURLs = "OTLabels/coco_image_URLs.txt"
-    annURL = "OTLabels/coco_annotation_URLs.txt"
+    image_urls = "OTLabels/coco_image_URLs.txt"
+    ann_url = "OTLabels/coco_annotation_URLs.txt"
     path = "OTLabels/data"
-    main(imageURLs, annURL, path)
+    main(image_urls, ann_url, path)
