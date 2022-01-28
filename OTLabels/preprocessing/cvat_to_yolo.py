@@ -118,7 +118,7 @@ def _fileStructure(cvatFile, destPath, labelsCVAT, labelsYOLO, name, counter):
     return annFiles
 
 
-def _cvatToYolo(destPath, cvatFile, labelsCVAT, labelsYOLO, name):
+def main(destPath, cvatFile, labelsCVAT, labelsYOLO, name):
     assert len(labelsCVAT) == len(labelsYOLO), "CVAT Labels and YOLO Labels differ!"
 
     n = 0
@@ -141,4 +141,4 @@ if __name__ == "__main__":
     labelsCVAT = pd.read_csv(catFile)
     labelsYOLO = _getCocoCats(catFile, annFile)
 
-    _cvatToYolo(destPath, cvatFile, labelsCVAT, labelsYOLO, name)
+    main(destPath, cvatFile, labelsCVAT, labelsYOLO, name)
