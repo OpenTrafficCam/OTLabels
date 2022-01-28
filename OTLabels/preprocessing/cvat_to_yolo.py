@@ -107,25 +107,25 @@ def _copy_files_convert(ann_files, ann_path, labels_cvat, labels_yolo, counter):
 
 
 def _file_structure(cvat_file, dest_path, labels_cvat, labels_yolo, name, counter):
-    image_files, ann_files, src_path = _unzip(cvat_file)
-    image_path = dest_path + "/images/" + name
+    img_files, ann_files, src_path = _unzip(cvat_file)
+    img_path = dest_path + "/images/" + name
     ann_path = dest_path + "/labels/" + name
 
-    _copy_files(image_files, image_path, counter)
+    _copy_files(img_files, img_path, counter)
 
     _copy_files_convert(ann_files, ann_path, labels_cvat, labels_yolo, counter)
     shutil.rmtree(src_path)
     return ann_files
 
 
-def main(dest_path, cvat_file, labels_cvat, labels_yolo, name):
+def main(dest_path, cvat_dir, labels_cvat, labels_yolo, name):
     assert len(labels_cvat) == len(labels_yolo), "CVAT Labels and YOLO Labels differ!"
 
     n = 0
-    if os.path.isfile(cvat_file):
-        _file_structure(cvat_file, dest_path, labels_cvat, labels_yolo, name, n)
-    elif os.path.isdir(cvat_file):
-        cvat_files = _file_list(cvat_file, "zip")
+    if os.path.isfile(cvat_dir):
+        _file_structure(cvat_dir, dest_path, labels_cvat, labels_yolo, name, n)
+    elif os.path.isdir(cvat_dir):
+        cvat_files = _file_list(cvat_dir, "zip")
         for file in cvat_files:
             _file_structure(file, dest_path, labels_cvat, labels_yolo, name, n)
             n = n + 1
