@@ -24,22 +24,22 @@ import pandas as pd
 import os
 
 
-def _getCocoCats(catFile, annFile):
-    cats = pd.read_csv(catFile)["Cat"].tolist()
-    coco = COCO(annFile)
-    catIds = coco.getCatIds(catNms=cats)
-    labelsCoco = pd.DataFrame(list(zip(cats, catIds)), columns=["Cat", "CatId"])
-    return labelsCoco
+def _get_coco_cats(cat_file, ann_file):
+    cats = pd.read_csv(cat_file)["Cat"].tolist()
+    coco = COCO(ann_file)
+    cat_ids = coco.getCatIds(catNms=cats)
+    labels_coco = pd.DataFrame(list(zip(cats, cat_ids)), columns=["Cat", "CatId"])
+    return labels_coco
 
 
-def _fileListCVAT(file, suffix):
+def _file_list_cvat(file, suffix):
     file = Path(file)
     dir = file.with_suffix("")
     files = dir.glob("obj_train_data/*.{}".format(suffix))
     return [str(file) for file in files]
 
 
-def _fileList(file, suffix):
+def _file_list(file, suffix):
     file = Path(file)
     dir = file.with_suffix("")
     files = dir.glob("*.{}".format(suffix))
@@ -50,27 +50,27 @@ def _unzip(file):
     file = Path(file)
     dir = file.with_suffix("")
     shutil.unpack_archive(file, dir)
-    imageFiles = _fileListCVAT(file, "png")
-    annFiles = _fileListCVAT(file, "txt")
-    return imageFiles, annFiles, dir
+    img_files = _file_list_cvat(file, "png")
+    ann_files = _file_list_cvat(file, "txt")
+    return img_files, ann_files, dir
 
 
-def _copyFiles(sourceFiles, destPath, counter):
-    if not Path(destPath).exists():
-        Path(destPath).mkdir()
-    for f in sourceFiles:
-        tmpName = f.split("\\")
-        newName = str(counter) + "_" + tmpName[-1]
-        shutil.copy(f, destPath + "\\" + newName)
+def _copy_files(src_files, dest_path, counter):
+    if not Path(dest_path).exists():
+        Path(dest_path).mkdir()
+    for f in src_files:
+        tmp_name = f.split("\\")
+        new_name = str(counter) + "_" + tmp_name[-1]
+        shutil.copy(f, dest_path + "\\" + new_name)
 
 
-def _createLabelDict(labelsCVAT, labelsYOLO):
+def _create_label_dict(labels_cvat, labels_yolo):
     labels = pd.merge(
-        labelsCVAT, labelsYOLO, how="inner", on="Cat", suffixes=["_CVAT", "_COCO"]
+        labels_cvat, labels_yolo, how="inner", on="Cat", suffixes=["_CVAT", "_COCO"]
     )
-    labelDict = {}
+    label_dict = {}
     for i in labels["Cat"]:
-        labelDict.update(
+        label_dict.update(
             {
                 labels.loc[labels["Cat"] == i, "CatId_CVAT"]
                 .values[0]: labels.loc[labels["Cat"] == i, "CatId_COCO"]
@@ -78,27 +78,27 @@ def _createLabelDict(labelsCVAT, labelsYOLO):
                 - 1
             }
         )
-    return labelDict
+    return label_dict
 
 
-def _copyFilesConvert(annFiles, annPath, labelsCVAT, labelsYOLO, counter):
-    if not Path(annPath).exists():
-        Path(annPath).mkdir()
+def _copy_files_convert(ann_files, ann_path, labels_cvat, labels_yolo, counter):
+    if not Path(ann_path).exists():
+        Path(ann_path).mkdir()
 
-    labelDict = _createLabelDict(labelsCVAT, labelsYOLO)
+    label_dict = _create_label_dict(labels_cvat, labels_yolo)
 
-    for f in annFiles:
-        fileName = f.split("\\")[-1]
+    for f in ann_files:
+        file_name = f.split("\\")[-1]
         if os.stat(f).st_size > 0:
-            fileLabels = pd.read_csv(f, header=None, sep=" ")
+            file_labels = pd.read_csv(f, header=None, sep=" ")
         else:
-            shutil.copy(f, annPath + "/" + str(counter) + "_" + fileName)
+            shutil.copy(f, ann_path + "/" + str(counter) + "_" + file_name)
             continue
-        fileLabels[0] = fileLabels[0].map(labelDict)
-        fileLabels = fileLabels.dropna()
-        fileLabels[0] = fileLabels[0].astype(int)
-        fileLabels.to_csv(
-            annPath + "/" + str(counter) + "_" + fileName,
+        file_labels[0] = file_labels[0].map(label_dict)
+        file_labels = file_labels.dropna()
+        file_labels[0] = file_labels[0].astype(int)
+        file_labels.to_csv(
+            ann_path + "/" + str(counter) + "_" + file_name,
             header=False,
             sep=" ",
             index=False,
@@ -106,39 +106,39 @@ def _copyFilesConvert(annFiles, annPath, labelsCVAT, labelsYOLO, counter):
         )
 
 
-def _fileStructure(cvatFile, destPath, labelsCVAT, labelsYOLO, name, counter):
-    imageFiles, annFiles, sourcepath = _unzip(cvatFile)
-    imagePath = destPath + "/images/" + name
-    annPath = destPath + "/labels/" + name
+def _file_structure(cvat_file, dest_path, labels_cvat, labels_yolo, name, counter):
+    image_files, ann_files, src_path = _unzip(cvat_file)
+    image_path = dest_path + "/images/" + name
+    ann_path = dest_path + "/labels/" + name
 
-    _copyFiles(imageFiles, imagePath, counter)
+    _copy_files(image_files, image_path, counter)
 
-    _copyFilesConvert(annFiles, annPath, labelsCVAT, labelsYOLO, counter)
-    shutil.rmtree(sourcepath)
-    return annFiles
+    _copy_files_convert(ann_files, ann_path, labels_cvat, labels_yolo, counter)
+    shutil.rmtree(src_path)
+    return ann_files
 
 
-def main(destPath, cvatFile, labelsCVAT, labelsYOLO, name):
-    assert len(labelsCVAT) == len(labelsYOLO), "CVAT Labels and YOLO Labels differ!"
+def main(dest_path, cvat_file, labels_cvat, labels_yolo, name):
+    assert len(labels_cvat) == len(labels_yolo), "CVAT Labels and YOLO Labels differ!"
 
     n = 0
-    if os.path.isfile(cvatFile):
-        _fileStructure(cvatFile, destPath, labelsCVAT, labelsYOLO, name, n)
-    elif os.path.isdir(cvatFile):
-        cvatFiles = _fileList(cvatFile, "zip")
-        for file in cvatFiles:
-            _fileStructure(file, destPath, labelsCVAT, labelsYOLO, name, n)
+    if os.path.isfile(cvat_file):
+        _file_structure(cvat_file, dest_path, labels_cvat, labels_yolo, name, n)
+    elif os.path.isdir(cvat_file):
+        cvat_files = _file_list(cvat_file, "zip")
+        for file in cvat_files:
+            _file_structure(file, dest_path, labels_cvat, labels_yolo, name, n)
             n = n + 1
 
 
 if __name__ == "__main__":
-    destPath = "D:/OTC/OTLabels/OTLabels/data/coco"
-    annFile = "D:/OTC/OTLabels/OTLabels/data/coco/annotations/instances_val2017.json"
-    catFile = "D:/OTC/OTLabels/OTLabels/labels_CVAT.txt"
-    cvatFile = "C:/Users/MichaelHeilig/Downloads/Radeberg"
+    dest_path = "D:/OTC/OTLabels/OTLabels/data/coco"
+    ann_file = "D:/OTC/OTLabels/OTLabels/data/coco/annotations/instances_val2017.json"
+    cat_file = "D:/OTC/OTLabels/OTLabels/labels_CVAT.txt"
+    cvat_dir = "C:/Users/MichaelHeilig/Downloads/Radeberg"
     name = "radeberger-00"
 
-    labelsCVAT = pd.read_csv(catFile)
-    labelsYOLO = _getCocoCats(catFile, annFile)
+    labels_cvat = pd.read_csv(cat_file)
+    labels_yolo = _get_coco_cats(cat_file, ann_file)
 
-    main(destPath, cvatFile, labelsCVAT, labelsYOLO, name)
+    main(dest_path, cvat_dir, labels_cvat, labels_yolo, name)
