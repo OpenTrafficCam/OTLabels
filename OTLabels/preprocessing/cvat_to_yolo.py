@@ -35,7 +35,7 @@ def _get_coco_cats(cat_file, ann_file):
 def _file_list_cvat(file, suffix):
     file = Path(file)
     dir = file.with_suffix("")
-    files = dir.glob("obj_train_data/*.{}".format(suffix))
+    files = dir.glob(f"obj_train_data/*.{suffix}")
     return [str(file) for file in files]
 
 
@@ -59,9 +59,8 @@ def _copy_files(src_files, dest_path, counter):
     if not Path(dest_path).exists():
         Path(dest_path).mkdir()
     for f in src_files:
-        tmp_name = f.split("\\")
-        new_name = str(counter) + "_" + tmp_name[-1]
-        shutil.copy(f, dest_path + "\\" + new_name)
+        new_name = f"{counter}_{Path(f).name}"
+        shutil.copy(f, Path(dest_path, new_name))
 
 
 def _create_label_dict(labels_cvat, labels_yolo):
@@ -88,12 +87,12 @@ def _copy_files_convert(ann_files, ann_path, labels_cvat, labels_yolo, counter):
     label_dict = _create_label_dict(labels_cvat, labels_yolo)
 
     for f in ann_files:
-        file_name = f.split("\\")[-1]
+        file_name = Path(f).name
         if os.stat(f).st_size > 0:
             file_labels = pd.read_csv(f, header=None, sep=" ")
         else:
-            shutil.copy(f, ann_path + "/" + str(counter) + "_" + file_name)
-            continue
+            shutil.copy(f, Path(ann_path, f"{counter}_{file_name}"))
+
         file_labels[0] = file_labels[0].map(label_dict)
         file_labels = file_labels.dropna()
         file_labels[0] = file_labels[0].astype(int)
@@ -108,8 +107,8 @@ def _copy_files_convert(ann_files, ann_path, labels_cvat, labels_yolo, counter):
 
 def _file_structure(cvat_file, dest_path, labels_cvat, labels_yolo, name, counter):
     img_files, ann_files, src_path = _unzip(cvat_file)
-    img_path = dest_path + "/images/" + name
-    ann_path = dest_path + "/labels/" + name
+    img_path = Path(dest_path, f"images/{name}")
+    ann_path = Path(dest_path, f"labels/{name}")
 
     _copy_files(img_files, img_path, counter)
 
