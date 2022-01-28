@@ -22,30 +22,29 @@ import shutil
 import urllib.request
 
 
-def _downloadAnnotations(URLFile, cocoPath):
-    with open(URLFile, "r") as f:
-        URLs = f.readlines()
-
-    if not Path(cocoPath).exists():
-        Path(cocoPath).mkdir()
-
-    for URL in URLs:
-        print('Download and unzip annotation files to "' + cocoPath + '"')
-
-        annoFile = cocoPath + "/annotations.zip"
-        urllib.request.urlretrieve(URL, annoFile)
-
-        _unzip(annoFile, cocoPath)
-
-
 def _unzip(file, dir):
     file = Path(file)
     shutil.unpack_archive(file, dir)
     Path.unlink(file)
 
 
-if __name__ == "__main__":
-    path = "OTLabels/data/coco"
-    URLFile = "OTLabels/coco_annotation_json_URLs.txt"
+def main(url_file, coco_path):
+    with open(url_file, "r") as f:
+        urls = f.readlines()
 
-    _downloadAnnotations(URLFile, path)
+    if not Path(coco_path).exists():
+        Path(coco_path).mkdir()
+
+    for url in urls:
+        print(f'Download and unzip annotation files to "{coco_path}"')
+
+        ann_file = Path(coco_path, "annotations.zip")
+        urllib.request.urlretrieve(url, ann_file)
+
+        _unzip(ann_file, coco_path)
+
+
+if __name__ == "__main__":
+    coco_path = "OTLabels/data/coco"
+    url_file = "OTLabels/coco_annotation_json_URLs.txt"
+    main(url_file, coco_path)
