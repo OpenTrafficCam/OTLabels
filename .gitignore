@@ -8,5 +8,6 @@ launch.json
 
 /venv
 /.venv
-/OTLabels/data/coco
+OTLabels/data/coco
+OTLabels/data/custom
 .DS_STORE
