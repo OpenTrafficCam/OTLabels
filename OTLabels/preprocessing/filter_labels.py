@@ -45,41 +45,67 @@ def _file_list(file, suffix):
     return [str(file) for file in files]
 
 
+def _has_files(dir_path):
+    directory = Path(dir_path)
+
+    if directory.is_dir():
+        raise NotADirectoryError(directory)
+
+    for f in directory.glob("**/*"):
+        if f.is_file():
+            return True
+
+    return False
+
+
+def _has_data(file_path):
+    f = Path(file_path)
+    return f.stat().st_size > 0
+
+
 def _filter_labels(
     labels_filter,
     path,
     name,
     appendix,
     num_background,
+    force_filtering,
     sample=1.0,
     reset_label_ids=False,
 ):
-    source_path = Path(path, "labels/" + name)
-    image_path = Path(path, "images/" + name)
-    dest_path_labels = Path(path, "labels/" + name + "_filtered_" + appendix)
-    dest_path_imgs = Path(path, "images/" + name + "_filtered_" + appendix)
-    dest_path_imgs_relative = "./images/" + name + "_filtered_" + appendix
+    source_dir = Path(path, "labels/" + name)
+    image_dir = Path(path, "images/" + name)
+    dest_dir_labels = Path(path, "labels/" + name + "_filtered_" + appendix)
+    dest_dir_imgs = Path(path, "images/" + name + "_filtered_" + appendix)
+    dest_dir_imgs_relative = "./images/" + name + "_filtered_" + appendix
 
-    img_type = Path(_file_list(image_path, "")[0]).suffix.lower()
+    img_type = Path(_file_list(image_dir, "")[0]).suffix.lower()
+
+    if not force_filtering and dest_dir_labels.exists() and dest_dir_imgs.exists():
+        print(
+            "Filtered data already exists. To force filtering set force_filtering FLAG "
+            + f'to True or delete these folders: "{dest_dir_labels}", "{dest_dir_imgs}"'
+        )
+        return
 
     # Remove existing filtered data
-    if Path(dest_path_labels).exists():
-        shutil.rmtree(dest_path_labels)
-    if Path(dest_path_imgs).exists():
-        shutil.rmtree(dest_path_imgs)
+    if Path(dest_dir_labels).exists():
+        shutil.rmtree(dest_dir_labels)
+    if Path(dest_dir_imgs).exists():
+        shutil.rmtree(dest_dir_imgs)
 
-    Path(dest_path_labels).mkdir(parents=True)
-    Path(dest_path_imgs).mkdir(parents=True)
+    Path(dest_dir_labels).mkdir(parents=True)
+    Path(dest_dir_imgs).mkdir(parents=True)
 
     labels = pd.read_csv(labels_filter)
-    ann_files = _file_list(source_path, "txt")
+    ann_files = _file_list(source_dir, "txt")
 
     if reset_label_ids:
         label_dict = _reset_labels(labels)
 
     print(
         'Filter files in "'
-        + str(source_path)
+        + str(source_dir)
         + '" by labels '
         + ", ".join(str(e) for e in labels["Cat"].tolist())
         + "...",
@@ -94,7 +120,7 @@ def _filter_labels(
 
         file_name = Path(f).name
         image_name = Path(file_name).stem + img_type
-        if os.stat(f).st_size > 0:
+        if _has_data(f):
             file_labels = pd.read_csv(f, header=None, sep=" ")
         else:
             continue
@@ -108,19 +134,19 @@ def _filter_labels(
                 file_labels[0] = file_labels[0].astype(int)
             if write:
                 file_labels.to_csv(
-                    Path(dest_path_labels, file_name),
+                    Path(dest_dir_labels, file_name),
                     header=False,
                     sep=" ",
                     index=False,
                     line_terminator="\n",
                 )
-                image_list.append(str(Path(dest_path_imgs_relative, image_name)))
-                image_list_source.append(str(Path(image_path, image_name)))
+                image_list.append(str(Path(dest_dir_imgs_relative, image_name)))
+                image_list_source.append(str(Path(image_dir, image_name)))
         else:
             if n < num_background:
-                open(Path(dest_path_labels, file_name), "a").close()  # NOTE: Reason?
-                image_list.append(str(Path(dest_path_imgs_relative, image_name)))
-                image_list_source.append(str(Path(image_path, image_name)))
+                open(Path(dest_dir_labels, file_name), "a").close()  # NOTE: Reason?
+                image_list.append(str(Path(dest_dir_imgs_relative, image_name)))
+                image_list_source.append(str(Path(image_dir, image_name)))
             n = n + 1
             continue
 
@@ -136,16 +162,16 @@ def _filter_labels(
 
     print(
         "Copying {num_imgs} images to {path} ...".format(
-            num_imgs=len(image_list), path=dest_path_imgs
+            num_imgs=len(image_list), path=dest_dir_imgs
         )
     )
     for img in tqdm(image_list_source):
-        shutil.copy(img, dest_path_imgs)
+        shutil.copy(img, dest_dir_imgs)
 
     print("Done!")
 
 
-def main(path, labelsFilter):
+def main(path, labels_filter, force_filtering=False):
     # TODO: #14 read name, sample and background from config file
     name = ["train2017", "val2017"]
     sample = [1, 1]
@@ -153,16 +179,26 @@ def main(path, labelsFilter):
     if isinstance(name, list):
         for n, s, b in zip(name, sample, numBackground):
             appendix = str(s) + "_6cl"
-            _filter_labels(labelsFilter, path, n, appendix, b, s, reset_label_ids=True)
+            _filter_labels(
+                labels_filter=labels_filter,
+                path=path,
+                name=n,
+                appendix=appendix,
+                num_background=b,
+                sample=s,
+                reset_label_ids=True,
+                force_filtering=force_filtering,
+            )
     else:
         appendix = str(sample)
         _filter_labels(
-            labelsFilter,
+            labels_filter,
             path,
             name,
             appendix,
             numBackground,
             sample,
+            force_filtering=force_filtering,
             reset_label_ids=True,
         )
 

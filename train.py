@@ -13,19 +13,22 @@ def main():
 
     # Get COCO dataset
 
-    if CONFIG.DOWNLOAD_COCO:
-        get_coco_data.main(
-            image_urls=CONFIG.COCO_IMAGE_URLS,
-            ann_url=CONFIG.COCO_ANNS_URLS,
-            save_path=CONFIG.DATA_DIR,
-            force_download=False,
-        )
+    get_coco_data.main(
+        image_urls=CONFIG.COCO_IMAGE_URLS,
+        ann_url=CONFIG.COCO_ANNS_URLS,
+        save_path=CONFIG.DATA_DIR,
+        force_download=False,
+    )
 
     # Convert to YOLO format
 
     # Filter COCO dataset
     if CONFIG.FILTER_CLASSES:
-        filter_labels.main(path=CONFIG.COCO_DIR, labelsFilter=CONFIG.LABELS_FILTER)
+        filter_labels.main(
+            path=CONFIG.COCO_DIR,
+            labels_filter=CONFIG.LABELS_FILTER,
+            force_filtering=False,
+        )
 
     """ train.run(
         weights=CONFIG.MODEL_WEIGHTS,
