@@ -15,12 +15,26 @@ PROJECT_NAME = "OTLabels"
 
 
 # Data Configuration
-DOWNLOAD_COCO = True
+
+# FLAGS
+FORCE_DOWNLOAD_COCO = False
+FORCE_FILTERING_LABELS = False
 USE_COCO = True
+USE_CUSTOM_DATSETS = True
 FILTER_CLASSES = True
+
+# Paths
 DATA_DIR = Path(WORKING_DIR, "OTLabels/data")
 DATA_CONFIG = Path(WORKING_DIR, "data/coco_6cl.yaml")
 COCO_IMAGE_URLS = Path(WORKING_DIR, "OTLabels/coco_image_URLs.txt")
 COCO_ANNS_URLS = Path(WORKING_DIR, "OTLabels/coco_annotation_URLs.txt")
 COCO_DIR = Path(WORKING_DIR, "OTLabels/data/coco")
-LABELS_FILTER = Path(WORKING_DIR, "OTLabels/labels_CVAT.txt")
+COCO_JSON_FILE = Path(
+    WORKING_DIR, "OTLabels/data/coco/annotations/instances_val2017.json"
+)
+LABELS_CVAT = Path(WORKING_DIR, "OTLabels/labels_CVAT.txt")
+
+CUSTOM_DATASETS = [
+    ("radeberg-00", Path(WORKING_DIR, "OTLabels/data/custom/task_radeberg"))
+]
+"""List of tuples where a tuple is (name, Path/to/custom/dataset)"""
