@@ -4,6 +4,7 @@ import config as CONFIG
 
 from OTLabels.preprocessing import get_coco_data
 from OTLabels.preprocessing import filter_labels
+from OTLabels.preprocessing import cvat_to_yolo
 
 
 def main():
@@ -17,7 +18,7 @@ def main():
         image_urls=CONFIG.COCO_IMAGE_URLS,
         ann_url=CONFIG.COCO_ANNS_URLS,
         save_path=CONFIG.DATA_DIR,
-        force_download=False,
+        force_download=CONFIG.FORCE_DOWNLOAD_COCO,
     )
 
     # Convert to YOLO format
@@ -26,9 +27,20 @@ def main():
     if CONFIG.FILTER_CLASSES:
         filter_labels.main(
             path=CONFIG.COCO_DIR,
-            labels_filter=CONFIG.LABELS_FILTER,
-            force_filtering=False,
+            labels_filter=CONFIG.LABELS_CVAT,
+            force_filtering=CONFIG.FORCE_FILTERING_LABELS,
         )
+
+    if CONFIG.USE_CUSTOM_DATSETS:
+        for name, dataset in CONFIG.CUSTOM_DATASETS:
+
+            cvat_to_yolo.main(
+                dest_path=CONFIG.COCO_DIR,
+                cvat_dir=dataset,
+                labels_cvat_path=CONFIG.LABELS_CVAT,
+                coco_ann_file_path=CONFIG.COCO_JSON_FILE,
+                name=name,
+            )
 
     """ train.run(
         weights=CONFIG.MODEL_WEIGHTS,

@@ -117,13 +117,15 @@ def _file_structure(cvat_file, dest_path, labels_cvat, labels_yolo, name, counte
     return ann_files
 
 
-def main(dest_path, cvat_dir, labels_cvat, labels_yolo, name):
+def main(dest_path, cvat_dir, labels_cvat_path, coco_ann_file_path, name):
+    labels_cvat = pd.read_csv(labels_cvat_path)
+    labels_yolo = _get_coco_cats(labels_cvat_path, coco_ann_file_path)
     assert len(labels_cvat) == len(labels_yolo), "CVAT Labels and YOLO Labels differ!"
 
     n = 0
-    if os.path.isfile(cvat_dir):
+    if Path(cvat_dir).is_file():
         _file_structure(cvat_dir, dest_path, labels_cvat, labels_yolo, name, n)
-    elif os.path.isdir(cvat_dir):
+    elif Path(cvat_dir).is_dir:
         cvat_files = _file_list(cvat_dir, "zip")
         for file in cvat_files:
             _file_structure(file, dest_path, labels_cvat, labels_yolo, name, n)
@@ -131,13 +133,17 @@ def main(dest_path, cvat_dir, labels_cvat, labels_yolo, name):
 
 
 if __name__ == "__main__":
-    dest_path = "D:/OTC/OTLabels/OTLabels/data/coco"
-    ann_file = "D:/OTC/OTLabels/OTLabels/data/coco/annotations/instances_val2017.json"
+    """dest_path = "D:/OTC/OTLabels/OTLabels/data/coco"
+    coco_ann_file = (
+        "D:/OTC/OTLabels/OTLabels/data/coco/annotations/instances_val2017.json"
+    )
     cat_file = "D:/OTC/OTLabels/OTLabels/labels_CVAT.txt"
     cvat_dir = "C:/Users/MichaelHeilig/Downloads/Radeberg"
     name = "radeberger-00"
 
     labels_cvat = pd.read_csv(cat_file)
-    labels_yolo = _get_coco_cats(cat_file, ann_file)
+    labels_yolo = _get_coco_cats(cat_file, coco_ann_file)
 
-    main(dest_path, cvat_dir, labels_cvat, labels_yolo, name)
+    main(dest_path, cvat_dir, labels_cvat_path, labels_yolo, name)
+    """
+    pass
