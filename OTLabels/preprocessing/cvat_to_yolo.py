@@ -39,7 +39,7 @@ def _file_list_cvat(file, suffix):
     return [str(file) for file in files]
 
 
-def _file_list(file, suffix):
+def _get_file_list(file, suffix):
     file = Path(file)
     dir = file.with_suffix("")
     files = dir.glob("*.{}".format(suffix))
@@ -126,7 +126,7 @@ def main(dest_path, cvat_dir, labels_cvat_path, coco_ann_file_path, name):
     if Path(cvat_dir).is_file():
         _file_structure(cvat_dir, dest_path, labels_cvat, labels_yolo, name, n)
     elif Path(cvat_dir).is_dir:
-        cvat_files = _file_list(cvat_dir, "zip")
+        cvat_files = _get_file_list(cvat_dir, "zip")
         for file in cvat_files:
             _file_structure(file, dest_path, labels_cvat, labels_yolo, name, n)
             n = n + 1
