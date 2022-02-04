@@ -50,13 +50,27 @@ def _get_file_list(file, suffix):
     return [str(file) for file in files]
 
 
-def _unzip(file):
-    file = Path(file)
-    dir = file.with_suffix("")
-    shutil.unpack_archive(file, dir)
-    img_files = _file_list_cvat(file, "png")
-    ann_files = _file_list_cvat(file, "txt")
-    return img_files, ann_files, dir
+def _unzip_cvat(zip_file):
+    """
+    Unzips and extracts a zip file.
+
+    Args:
+        zip_file(str|PosixPath): the zip file.
+        extract_dir(str|PosixPath): the directory to extract the zip file to.
+
+    Returns:
+        The absolute path of the unzipped file or directory.
+    """
+    zip_file = Path(zip_file)
+    extract_dir = Path(zip_file.parent, zip_file.stem)
+    shutil.unpack_archive(zip_file, extract_dir)
+    return extract_dir
+
+
+def _get_cvat_files(cvat_dir):
+    img_files = _file_list_cvat(cvat_dir, "png")
+    ann_files = _file_list_cvat(cvat_dir, "txt")
+    return img_files, ann_files
 
 
 def _copy_files(src_files, dest_path, counter):
@@ -109,10 +123,7 @@ def _copy_files_convert(ann_files, ann_path, labels_cvat, labels_yolo, counter):
         )
 
 
-def _file_structure(cvat_file, dest_path, labels_cvat, labels_yolo, name, counter):
-    img_files, ann_files, src_path = _unzip(cvat_file)
-    img_path = Path(dest_path, f"images/{name}")
-    ann_path = Path(dest_path, f"labels/{name}")
+    img_files, ann_files = _get_cvat_files(cvat_dir)
 
     _copy_files(img_files, img_path, counter)
 
