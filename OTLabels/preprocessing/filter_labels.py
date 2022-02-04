@@ -140,12 +140,12 @@ def _filter_labels(
                     index=False,
                     line_terminator="\n",
                 )
-                image_list.append(str(Path(dest_dir_imgs_relative, image_name)))
+                image_list.append("./" + str(Path(dest_dir_imgs_relative, image_name)))
                 image_list_source.append(str(Path(image_dir, image_name)))
         else:
             if n < num_background:
                 open(Path(dest_dir_labels, file_name), "a").close()  # NOTE: Reason?
-                image_list.append(str(Path(dest_dir_imgs_relative, image_name)))
+                image_list.append("./" + str(Path(dest_dir_imgs_relative, image_name)))
                 image_list_source.append(str(Path(image_dir, image_name)))
             n = n + 1
             continue
