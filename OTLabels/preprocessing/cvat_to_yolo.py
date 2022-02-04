@@ -101,7 +101,7 @@ def _copy_files_convert(ann_files, ann_path, labels_cvat, labels_yolo, counter):
         file_labels = file_labels.dropna()
         file_labels[0] = file_labels[0].astype(int)
         file_labels.to_csv(
-            ann_path + "/" + str(counter) + "_" + file_name,
+            Path(ann_path, f"{counter}_{file_name}"),
             header=False,
             sep=" ",
             index=False,
