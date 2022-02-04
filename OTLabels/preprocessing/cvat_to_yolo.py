@@ -123,13 +123,16 @@ def _copy_files_convert(ann_files, ann_path, labels_cvat, labels_yolo, counter):
         )
 
 
+def _convert_cvat_to_yolo(cvat_dir, dest_path, labels_cvat, labels_yolo, counter):
     img_files, ann_files = _get_cvat_files(cvat_dir)
+    img_path = Path(dest_path, "images", Path(cvat_dir).name)
+    ann_path = Path(dest_path, "labels", Path(cvat_dir).name)
 
     _copy_files(img_files, img_path, counter)
 
     _copy_files_convert(ann_files, ann_path, labels_cvat, labels_yolo, counter)
-    shutil.rmtree(src_path)
-    return ann_files
+    shutil.rmtree(cvat_dir)
+    return img_files, ann_files
 
 
 def main(dest_path, cvat_dir, labels_cvat_path, coco_ann_file_path, name):
