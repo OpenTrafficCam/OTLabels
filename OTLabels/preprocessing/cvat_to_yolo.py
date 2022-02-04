@@ -32,11 +32,15 @@ def _get_coco_cats(cat_file, ann_file):
     return labels_coco
 
 
-def _file_list_cvat(file, suffix):
-    file = Path(file)
-    dir = file.with_suffix("")
-    files = dir.glob(f"obj_train_data/*.{suffix}")
-    return [str(file) for file in files]
+def _file_list_cvat(cvat_dir, file_extension):
+    obj_train_data_dir = Path(cvat_dir, "obj_train_data")
+    file_ext_matcher = re.compile(f"\\.?({file_extension.lower()})")
+    files = [
+        str(p)
+        for p in obj_train_data_dir.iterdir()
+        if p.is_file and file_ext_matcher.match(p.suffix.lower())
+    ]
+    return files
 
 
 def _get_file_list(file, suffix):
