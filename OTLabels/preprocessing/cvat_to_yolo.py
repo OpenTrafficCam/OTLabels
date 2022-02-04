@@ -61,7 +61,7 @@ def _unzip(file):
 
 def _copy_files(src_files, dest_path, counter):
     if not Path(dest_path).exists():
-        Path(dest_path).mkdir()
+        Path(dest_path).mkdir(parents=True)
     for f in src_files:
         new_name = f"{counter}_{Path(f).name}"
         shutil.copy(f, Path(dest_path, new_name))
@@ -86,7 +86,7 @@ def _create_label_dict(labels_cvat, labels_yolo):
 
 def _copy_files_convert(ann_files, ann_path, labels_cvat, labels_yolo, counter):
     if not Path(ann_path).exists():
-        Path(ann_path).mkdir()
+        Path(ann_path).mkdir(parents=True)
 
     label_dict = _create_label_dict(labels_cvat, labels_yolo)
 
