@@ -16,12 +16,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # TODO: docstrings in cvat_to_coco
+import os
+import re
+import shutil
 
 from pathlib import Path
-import shutil
 from pycocotools.coco import COCO
 import pandas as pd
-import os
 
 
 def _get_coco_cats(cat_file, ann_file):
@@ -135,19 +136,48 @@ def _convert_cvat_to_yolo(cvat_dir, dest_path, labels_cvat, labels_yolo, counter
     return img_files, ann_files
 
 
-def main(dest_path, cvat_dir, labels_cvat_path, coco_ann_file_path, name):
+def _is_yolo_cvat_dir(path):
+    """Checks if `dir` adheres to CVAT YOLO format"""
+    return (
+        Path(path, "train.txt").exists()
+        and Path(path, "obj.data").exists()
+        and Path(path, "obj.names").exists()
+        and Path(path, "obj_train_data")
+    ) and Path(path).is_dir()
+
+
+def _is_zip_file(file_path):
+    return Path(file_path).is_file() and file_path.suffix == ".zip"
+
+
+def main(dest_path, cvat_path, labels_cvat_path, coco_ann_file_path, new_dataset_name):
+
+    # NOTE: if multiple directories are passed, converted datasets are saved at dest_path/name
+    dest_path = Path(dest_path, new_dataset_name)
+    cvat_path = Path(cvat_path)
+
     labels_cvat = pd.read_csv(labels_cvat_path)
     labels_yolo = _get_coco_cats(labels_cvat_path, coco_ann_file_path)
     assert len(labels_cvat) == len(labels_yolo), "CVAT Labels and YOLO Labels differ!"
 
+    # assumes that cvat_dir is a zip file or a directory containing zip files
     n = 0
-    if Path(cvat_dir).is_file():
-        _file_structure(cvat_dir, dest_path, labels_cvat, labels_yolo, name, n)
-    elif Path(cvat_dir).is_dir:
-        cvat_files = _get_file_list(cvat_dir, "zip")
-        for file in cvat_files:
-            _file_structure(file, dest_path, labels_cvat, labels_yolo, name, n)
-            n = n + 1
+    if _is_zip_file(cvat_path):
+        cvat_path = _unzip_cvat(zip_file=cvat_path)
+
+    if _is_yolo_cvat_dir(cvat_path):
+        _convert_cvat_to_yolo(cvat_path, dest_path, labels_cvat, labels_yolo, n)
+    elif cvat_path.is_dir():
+        # directory with multiple folders containing custom data
+
+        for path in cvat_path.iterdir():
+            temp_path = path
+            if _is_zip_file(path):
+                temp_path = _unzip_cvat(zip_file=path)
+
+            if _is_yolo_cvat_dir(temp_path):
+                _convert_cvat_to_yolo(temp_path, dest_path, labels_cvat, labels_yolo, n)
+                n = n + 1
 
 
 if __name__ == "__main__":
