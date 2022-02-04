@@ -19,7 +19,6 @@
 
 from pathlib import Path
 import pandas as pd
-import os
 import shutil
 import random
 from tqdm import tqdm
