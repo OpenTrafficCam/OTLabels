@@ -32,15 +32,13 @@ def main():
         )
 
     if CONFIG.USE_CUSTOM_DATSETS:
-        for name, dataset in CONFIG.CUSTOM_DATASETS:
-
-            cvat_to_yolo.main(
-                dest_path=CONFIG.COCO_DIR,
-                cvat_dir=dataset,
-                labels_cvat_path=CONFIG.LABELS_CVAT,
-                coco_ann_file_path=CONFIG.COCO_JSON_FILE,
-                name=name,
-            )
+        cvat_to_yolo.main(
+            dest_path=CONFIG.CUSTOM_DIR,
+            cvat_path=CONFIG.CUSTOM_DATASETS,
+            labels_cvat_path=CONFIG.LABELS_CVAT,
+            coco_ann_file_path=CONFIG.COCO_JSON_FILE,
+            new_dataset_name=CONFIG.CUSTOM_DATASET_NAME,
+        )
 
     """ train.run(
         weights=CONFIG.MODEL_WEIGHTS,
@@ -51,6 +49,7 @@ def main():
         batch_size=CONFIG.BATCH_SIZE,
         project=CONFIG.PROJECT_NAME,
         name=CONFIG.MODEL_NAME,
+        resume=CONFIG.RESUME_TRAINING,
     ) """
 
 
