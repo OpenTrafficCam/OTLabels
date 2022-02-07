@@ -87,10 +87,8 @@ def main(image_urls, ann_url, save_path, force_download=False):
         _download_annotations(ann_url, save_path)
         _download_images(image_urls, image_path)
     else:
-        if not Path(save_path, "coco/annotations").exists():
+        if not Path(save_path, "coco").exists():
             _download_annotations(ann_url, save_path)
-
-        elif not image_path.exists():
             _download_images(image_urls, image_path)
 
 
