@@ -10,4 +10,5 @@ launch.json
 /.venv
 OTLabels/data/coco
 OTLabels/data/custom
+OTLabels/data/runs
 .DS_STORE
