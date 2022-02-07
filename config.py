@@ -4,7 +4,7 @@ WORKING_DIR = Path(__file__).parent
 
 # Training Parameters
 BATCH_SIZE = -1  # -1 for auto-batch
-EPOCHS = 1
+EPOCHS = 300
 RESUME_TRAINING = True
 """Path to model weights(model.pt) or `True` to fetch latest run."""
 
