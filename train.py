@@ -8,20 +8,13 @@ from OTLabels.preprocessing import cvat_to_yolo
 
 
 def main():
-    # train.py --weights "yolov5m.pt" --cfg "../OTLabels/models/yolov5m_6cl.yaml"
-    # --data "../OTLabels/data/coco_6cl.yaml" --hyp "data/hyp.finetune.yaml"
-    # --epochs 150 --batch-size 64 --project "OTLabels" --name "yolo_v5m_6cl_finetune"
-
     # Get COCO dataset
-
     get_coco_data.main(
         image_urls=CONFIG.COCO_IMAGE_URLS,
         ann_url=CONFIG.COCO_ANNS_URLS,
         save_path=CONFIG.DATA_DIR,
         force_download=CONFIG.FORCE_DOWNLOAD_COCO,
     )
-
-    # Convert to YOLO format
 
     # Filter COCO dataset
     if CONFIG.FILTER_CLASSES:
@@ -40,7 +33,7 @@ def main():
             new_dataset_name=CONFIG.CUSTOM_DATASET_NAME,
         )
 
-    """ train.run(
+    train.run(
         weights=CONFIG.MODEL_WEIGHTS,
         cfg=CONFIG.MODEL_CFG,
         data=CONFIG.DATA_CONFIG,
@@ -49,8 +42,7 @@ def main():
         batch_size=CONFIG.BATCH_SIZE,
         project=CONFIG.PROJECT_NAME,
         name=CONFIG.MODEL_NAME,
-        resume=CONFIG.RESUME_TRAINING,
-    ) """
+    )
 
 
 if __name__ == "__main__":
