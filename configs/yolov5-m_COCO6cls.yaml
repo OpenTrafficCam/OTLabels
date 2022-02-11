@@ -1,0 +1,40 @@
+---
+paths_are_relative: true #  True if paths defined below relative to `path`. Otherwise treat paths as absolute.
+
+# Training parameters
+batch_size: -1 # -1 for auto-batch -> automatically determine batch_size
+epochs: 300
+resume_training: true # Resume from most recent training or when model_weights specified, resume from specified weights
+
+# Model configuration
+
+# To train model from scratch set `model_weights: ""` and `model_cfg: path/to/model_cfg.yaml`.
+# model_weights can also be a path to custom weights.
+model_weights: "" 
+model_name: yolov5-m_COCO6cls
+model_cfg: OTLabels/models/yolov5m_6cl.yaml
+model_hyp: OTLabels/data/hyp.finetune.yaml
+project_name: OTLabels/data/runs/yolov5-m_COCO6cls
+
+# Data Configuration
+
+# FLAGS
+force_download_coco: false
+force_filtering_labels: false
+use_custom_datasets: false
+filter_classes: true
+
+data_dir: OTLabels/data
+data_config: OTLabels/data/coco_6cl.yaml
+labels_cvat: OTLabels/labels_CVAT.txt
+
+# COCO Paths
+coco_img_urls: OTLabels/coco_image_URLs.txt
+coco_anns_urls: OTLabels/coco_annotation_URLs.txt
+coco_dir: OTLabels/data/coco
+coco_json_file: OTLabels/data/coco/annotations/instances_val2017.json
+
+# Custom Datasets
+custom_dir: OTLabels/data/custom
+custom_dataset_name: otc_custom
+custom_datasets: OTLabels/data/custom

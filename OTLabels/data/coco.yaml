@@ -95,4 +95,8 @@ names: [
     'teddy bear',
     'hair drier',
     'toothbrush',
+<<<<<<< HEAD
   ] # class names
+=======
+  ] # class names
+>>>>>>> rework-otlabels
