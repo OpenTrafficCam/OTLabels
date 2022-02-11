@@ -1,49 +1,53 @@
 from yolov5 import train
 
 import config as CONFIG
+from config import load_config
 
 from OTLabels.preprocessing import get_coco_data
 from OTLabels.preprocessing import filter_labels
 from OTLabels.preprocessing import cvat_to_yolo
 
 
-def main():
+def main(config_path):
+    config = load_config(config_path)
+
     # Get COCO dataset
     get_coco_data.main(
-        image_urls=CONFIG.COCO_IMAGE_URLS,
-        ann_url=CONFIG.COCO_ANNS_URLS,
-        save_path=CONFIG.DATA_DIR,
-        force_download=CONFIG.FORCE_DOWNLOAD_COCO,
+        image_urls=config["coco_img_urls"],
+        ann_url=config["coco_anns_urls"],
+        save_path=config["data_dir"],
+        force_download=config["force_download_coco"],
     )
 
     # Filter COCO dataset
-    if CONFIG.FILTER_CLASSES:
+    if config["filter_classes"]:
         filter_labels.main(
-            path=CONFIG.COCO_DIR,
-            labels_filter=CONFIG.LABELS_CVAT,
-            force_filtering=CONFIG.FORCE_FILTERING_LABELS,
+            path=config["coco_dir"],
+            labels_filter=config["labels_cvat"],
+            force_filtering=config["force_filtering_labels"],
         )
 
-    if CONFIG.USE_CUSTOM_DATSETS:
+    if config["use_custom_datasets"]:
         cvat_to_yolo.main(
-            dest_path=CONFIG.CUSTOM_DIR,
-            cvat_path=CONFIG.CUSTOM_DATASETS,
-            labels_cvat_path=CONFIG.LABELS_CVAT,
-            coco_ann_file_path=CONFIG.COCO_JSON_FILE,
-            new_dataset_name=CONFIG.CUSTOM_DATASET_NAME,
+            dest_path=config["custom_dir"],
+            cvat_path=config["custom_datasets"],
+            labels_cvat_path=config["labels_cvat"],
+            coco_ann_file_path=config["coco_json_file"],
+            new_dataset_name=config["custom_dataset_name"],
         )
 
     train.run(
-        weights=CONFIG.MODEL_WEIGHTS,
-        cfg=CONFIG.MODEL_CFG,
-        data=CONFIG.DATA_CONFIG,
-        hyp=CONFIG.MODEL_HYP,
-        epochs=CONFIG.EPOCHS,
-        batch_size=CONFIG.BATCH_SIZE,
-        project=CONFIG.PROJECT_NAME,
-        name=CONFIG.MODEL_NAME,
+        weights=config["model_weights"],
+        cfg=config["model_cfg"],
+        data=config["data_config"],
+        hyp=config["model_hyp"],
+        epochs=config["epochs"],
+        batch_size=config["batch_size"],
+        project=config["project_name"],
+        name=config["model_name"],
     )
 
 
 if __name__ == "__main__":
-    main()
+    config_path = CONFIG.MODEL_TRAINING_CONFIG_PATH
+    main(config_path)
