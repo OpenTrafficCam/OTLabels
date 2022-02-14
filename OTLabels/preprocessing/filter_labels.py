@@ -170,6 +170,40 @@ def _filter_labels(
     print("Done!")
 
 
+def _filter_imgs_with_bbox_gt_thresh(bbox, img_height, img_width, normalized):
+    # convert bbox to not normalized representation if normalized = True
+    pass
+
+
+def _bbox_to_img_area_ratio_lt_thresh(
+    bbox_width, bbox_height, img_width, img_height, thresh
+):
+    assert thresh in range(0, 1), "Threshhold must be a value between [0,1]"
+
+    if img_width < 0 or img_height < 0:
+        img_size_neg_error_msg = (
+            "Image width and height must be positive values. "
+            + f"Actual values: width={img_width} | height={img_height}"
+        )
+        raise ValueError(img_size_neg_error_msg)
+
+    if bbox_width < 0 or bbox_height < 0:
+        bbox_neg_error_msg = (
+            "Bbox width and height must be positive values. "
+            + f"Actual values: width={bbox_width} | height={bbox_height}"
+        )
+        raise ValueError(bbox_neg_error_msg)
+    bbox_area = bbox_width * bbox_height
+    img_area = img_width * img_height
+
+    assert not bbox_area > img_area, (
+        "Bounding box area is greater than image. "
+        + f"Actual values: bbox area={bbox_area} | img area={img_area}"
+    )
+
+    return (bbox_area / img_area) < thresh
+
+
 def main(path, labels_filter, force_filtering=False):
     # TODO: #14 read name, sample and background from config file
     name = ["train2017", "val2017"]
