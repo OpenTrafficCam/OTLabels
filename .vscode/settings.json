@@ -1,13 +1,13 @@
 {
-    "python.formatting.provider": "black",
-    "python.linting.pylintEnabled": false,
-    "python.linting.flake8Enabled": true,
-    "python.linting.enabled": true,
-    "python.analysis.extraPaths": [
-        "./yolov5",
-        "./OTLabels"
-    ],
-    "python.languageServer": "Pylance",
-    "python.pythonPath": ".\\venv\\Scripts\\python.exe",
-    "editor.formatOnSave": true
+  "python.formatting.provider": "black",
+  "python.linting.pylintEnabled": false,
+  "python.linting.flake8Enabled": true,
+  "python.linting.enabled": true,
+  "python.analysis.extraPaths": ["./yolov5", "./OTLabels"],
+  "python.languageServer": "Pylance",
+  "python.pythonPath": ".\\venv\\Scripts\\python.exe",
+  "editor.formatOnSave": true,
+  "python.testing.pytestArgs": ["test"],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true
 }
