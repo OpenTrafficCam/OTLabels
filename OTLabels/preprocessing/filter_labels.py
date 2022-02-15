@@ -164,12 +164,27 @@ def _filter_labels(
     print("Done!")
 
 
-def _filter_imgs_with_bbox_img_ratio_gt_thresh(img_paths, normalized, is_xyxy_format):
+def _get_bboxes(label_path):
+    """
+    Reads and parses the bounding boxes from a YOLOv5 annotation text file.
 
-    # get bboxes
-    bboxes = read(img_paths)
+    The text file should contain bboxes in the form of `class x y w h\\n` where each
+    value is separated by a whitespace and a newline marks a new bounding box.
 
-    pass
+    Args:
+        label_path(str|PosixPath): Path to text file in YOLOv5 annotation format.
+
+    Returns:
+        A list containing the bounding box values in the form of [x, y, w, h].
+    """
+    with open(label_path, "r", errors="ignore") as f:
+        lines = [line.rstrip("\n") for line in f.readlines()]
+        bboxes = []
+        for line in lines:
+            vals = line.split(" ")
+            bbox = [float(vals[1]), float(vals[2]), float(vals[3]), float(vals[4])]
+            bboxes.append(bbox)
+        return bboxes
 
 
 def _bbox_to_img_area_ratio_lt_thresh(
