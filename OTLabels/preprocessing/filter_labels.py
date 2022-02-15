@@ -190,7 +190,9 @@ def _get_bboxes(label_path):
 def _bbox_to_img_area_ratio_lt_thresh(
     bbox_width, bbox_height, img_width, img_height, thresh
 ):
-    assert thresh in range(0, 1), "Threshhold must be a value between [0,1]"
+    assert (
+        0 <= thresh and thresh <= 1
+    ), f"Threshhold must be a value between [0,1]. Actual value:{thresh}"
 
     if img_width < 0 or img_height < 0:
         img_size_neg_error_msg = (
