@@ -7,11 +7,6 @@ from continue_training import _determine_last_pt_path
 
 
 @pytest.fixture
-def test_resources_dir() -> Path:
-    return Path(Path(__file__).parent, "resources")
-
-
-@pytest.fixture
 def wandb_project_dir(test_resources_dir: Path) -> Path:
     example = test_resources_dir / "example"
 
@@ -41,7 +36,7 @@ def wandb_project_dir(test_resources_dir: Path) -> Path:
 
     yield create_wandb_project_dir
 
-    shutil.rmtree(test_resources_dir)
+    shutil.rmtree(example)
 
 
 @pytest.mark.parametrize("num_runs", [1, 2, 3])

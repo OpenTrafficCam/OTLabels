@@ -16,8 +16,8 @@ def neg_img_size():
 
 
 @pytest.fixture
-def test_dataset_dir():
-    return Path(Path(__file__).parent, "resources/example_dataset")
+def test_dataset_dir(test_resources_dir):
+    return Path(test_resources_dir, "example_dataset")
 
 
 @pytest.fixture
