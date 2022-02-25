@@ -32,7 +32,11 @@ def wandb_project_dir(test_resources_dir: Path) -> Path:
             run_best_pt.touch(exist_ok=True)
             run_last_pt.touch(exist_ok=True)
 
-        return project_name, model_name
+        config = {}
+        config["project_name"] = project_name
+        config["model_name"] = model_name
+
+        return config
 
     yield create_wandb_project_dir
 
@@ -43,10 +47,10 @@ def wandb_project_dir(test_resources_dir: Path) -> Path:
 def test_get_last_pt_path_and_next_model_name_returnsCorrectPathModelname(
     wandb_project_dir, num_runs
 ):
-    project_name, model_name = wandb_project_dir(num_runs)
-    config = {}
-    config["project_name"] = project_name
-    config["model_name"] = model_name
+    config = wandb_project_dir(num_runs)
+    project_name = config["project_name"]
+    model_name = config["model_name"]
+
     result_last_pt, result_next_model_name = _get_last_pt_path_and_next_model_name(
         config
     )
@@ -59,3 +63,11 @@ def test_get_last_pt_path_and_next_model_name_returnsCorrectPathModelname(
 
     assert result_last_pt == correct
     assert result_next_model_name == f"{model_name}_{num_runs + 1}"
+
+
+def test_get_last_pt_path_and_next_model_name_noLastPtAsParam_raiseFileNotFoundError():
+    config = {}
+    config["project_name"] = Path("path/to/dir/not/exists")
+    config["model_name"] = Path("model_name")
+    with pytest.raises(FileNotFoundError):
+        _get_last_pt_path_and_next_model_name(config)
