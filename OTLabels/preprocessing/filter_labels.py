@@ -143,7 +143,7 @@ def _filter_labels(
                 image_list_source.append(str(Path(image_dir, image_name)))
         else:
             if n < num_background:
-                open(Path(dest_dir_labels, file_name), "a").close()  # NOTE: Reason?
+                open(Path(dest_dir_labels, file_name), "a").close()  # Create empty ann
                 rel_image_path_list.append(
                     f"./{Path(dest_dir_imgs_relative, image_name)}"
                 )
