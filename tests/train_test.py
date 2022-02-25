@@ -3,7 +3,7 @@ import shutil
 import pytest
 from pathlib import Path
 
-from continue_training import _determine_last_pt_path
+from train import _get_last_pt_path_and_next_model_name
 
 
 @pytest.fixture
@@ -21,7 +21,7 @@ def wandb_project_dir(test_resources_dir: Path) -> Path:
             if i <= 1:
                 run_dir = project_name / f"{model_name}"
             else:
-                run_dir = project_name / f"{model_name}{i}"
+                run_dir = project_name / f"{model_name}_{i}"
 
             run_weights_dir = run_dir / "weights"
             run_best_pt = run_weights_dir / "best.pt"
@@ -40,16 +40,22 @@ def wandb_project_dir(test_resources_dir: Path) -> Path:
 
 
 @pytest.mark.parametrize("num_runs", [1, 2, 3])
-def test_determine_last_pt_path_returnsCorrectPath(wandb_project_dir, num_runs):
+def test_get_last_pt_path_and_next_model_name_returnsCorrectPathModelname(
+    wandb_project_dir, num_runs
+):
     project_name, model_name = wandb_project_dir(num_runs)
     config = {}
     config["project_name"] = project_name
     config["model_name"] = model_name
-    result = _determine_last_pt_path(config)
+    result_last_pt, result_next_model_name = _get_last_pt_path_and_next_model_name(
+        config
+    )
 
     if num_runs == 1:
         correct = Path(project_name, f"{model_name}/weights/last.pt")
-    else:
-        correct = Path(project_name, f"{model_name}{num_runs}/weights/last.pt")
 
-    assert result == correct
+    else:
+        correct = Path(project_name, f"{model_name}_{num_runs}/weights/last.pt")
+
+    assert result_last_pt == correct
+    assert result_next_model_name == f"{model_name}_{num_runs + 1}"
