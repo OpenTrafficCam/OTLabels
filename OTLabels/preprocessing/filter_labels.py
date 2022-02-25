@@ -72,11 +72,11 @@ def _filter_labels(
     sample=1.0,
     reset_label_ids=False,
 ):
-    source_dir = Path(path, "labels/" + name)
-    image_dir = Path(path, "images/" + name)
-    dest_dir_labels = Path(path, "labels/" + name + "_filtered_" + appendix)
-    dest_dir_imgs = Path(path, "images/" + name + "_filtered_" + appendix)
-    dest_dir_imgs_relative = "./images/" + name + "_filtered_" + appendix
+    source_dir = Path(path, f"labels/{name}")
+    image_dir = Path(path, f"images/{name}")
+    dest_dir_labels = Path(path, f"labels/{name}_filtered_{appendix}")
+    dest_dir_imgs = Path(path, f"images/{name}_filtered_{appendix}")
+    dest_dir_imgs_relative = f"./images/{name}_filtered_{appendix}"
 
     img_type = Path(_file_list(image_dir, "")[0]).suffix.lower()
 
@@ -103,14 +103,12 @@ def _filter_labels(
         label_dict = _reset_labels(labels)
 
     print(
-        'Filter files in "'
-        + str(source_dir)
-        + '" by labels '
+        f"Filter files in {source_dir} by labels "
         + ", ".join(str(e) for e in labels["Cat"].tolist())
-        + "...",
+        + "..."
     )
 
-    image_list = []
+    rel_image_path_list = []
     image_list_source = []
     n = 0
     for f in tqdm(ann_files):
@@ -139,35 +137,85 @@ def _filter_labels(
                     index=False,
                     line_terminator="\n",
                 )
-                image_list.append("./" + str(Path(dest_dir_imgs_relative, image_name)))
+                rel_image_path_list.append(
+                    "./" + str(Path(dest_dir_imgs_relative, image_name))
+                )
                 image_list_source.append(str(Path(image_dir, image_name)))
         else:
             if n < num_background:
-                open(Path(dest_dir_labels, file_name), "a").close()  # NOTE: Reason?
-                image_list.append("./" + str(Path(dest_dir_imgs_relative, image_name)))
+                open(Path(dest_dir_labels, file_name), "a").close()  # Create empty ann
+                rel_image_path_list.append(
+                    f"./{Path(dest_dir_imgs_relative, image_name)}"
+                )
                 image_list_source.append(str(Path(image_dir, image_name)))
             n = n + 1
             continue
 
-    file_filtered_labels = Path(path, name + "_filtered_" + appendix + ".txt")
-    print(
-        "Writing file with filtered labels to {path} ...".format(
-            path=file_filtered_labels
-        )
-    )
+    file_filtered_labels = Path(path, f"{name}_filtered_{appendix}.txt")
+    print(f"Writing file with filtered labels to {file_filtered_labels} ...")
 
     with open(file_filtered_labels, "w") as f:
-        f.write("\n".join(image_list))
+        f.write("\n".join(rel_image_path_list))
 
-    print(
-        "Copying {num_imgs} images to {path} ...".format(
-            num_imgs=len(image_list), path=dest_dir_imgs
-        )
-    )
+    print(f"Copying {len(rel_image_path_list)} images to {dest_dir_imgs} ...")
     for img in tqdm(image_list_source):
         shutil.copy(img, dest_dir_imgs)
 
     print("Done!")
+
+
+def _get_bboxes(label_path):
+    """
+    Reads and parses the bounding boxes from a YOLOv5 annotation text file.
+
+    The text file should contain bboxes in the form of `class x y w h\\n` where each
+    value is separated by a whitespace and a newline marks a new bounding box.
+
+    Args:
+        label_path(str|PosixPath): Path to text file in YOLOv5 annotation format.
+
+    Returns:
+        A list containing the bounding box values in the form of [x, y, w, h].
+    """
+    with open(label_path, "r", errors="ignore") as f:
+        lines = [line.rstrip("\n") for line in f.readlines()]
+        bboxes = []
+        for line in lines:
+            vals = line.split(" ")
+            bbox = [float(vals[1]), float(vals[2]), float(vals[3]), float(vals[4])]
+            bboxes.append(bbox)
+        return bboxes
+
+
+def _bbox_to_img_area_ratio_lt_thresh(
+    bbox_width, bbox_height, img_width, img_height, thresh
+):
+    assert (
+        0 <= thresh and thresh <= 1
+    ), f"Threshhold must be a value between [0,1]. Actual value:{thresh}"
+
+    if img_width < 0 or img_height < 0:
+        img_size_neg_error_msg = (
+            "Image width and height must be positive values. "
+            + f"Actual values: width={img_width} | height={img_height}"
+        )
+        raise ValueError(img_size_neg_error_msg)
+
+    if bbox_width < 0 or bbox_height < 0:
+        bbox_neg_error_msg = (
+            "Bbox width and height must be positive values. "
+            + f"Actual values: width={bbox_width} | height={bbox_height}"
+        )
+        raise ValueError(bbox_neg_error_msg)
+    bbox_area = bbox_width * bbox_height
+    img_area = img_width * img_height
+
+    assert not bbox_area > img_area, (
+        "Bounding box area is greater than image. "
+        + f"Actual values: bbox area={bbox_area} | img area={img_area}"
+    )
+
+    return (bbox_area / img_area) < thresh
 
 
 def main(path, labels_filter, force_filtering=False):

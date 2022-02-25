@@ -152,7 +152,8 @@ def _is_zip_file(file_path):
 
 def main(dest_path, cvat_path, labels_cvat_path, coco_ann_file_path, new_dataset_name):
 
-    # NOTE: if multiple directories are passed, converted datasets are saved at dest_path/name
+    # NOTE: if multiple directories are passed, converted datasets are saved at
+    # dest_path/name
     dest_path = Path(dest_path, new_dataset_name)
     cvat_path = Path(cvat_path)
 
