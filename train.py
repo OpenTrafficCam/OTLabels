@@ -116,6 +116,10 @@ def _search_last_pt_recursively(
 ) -> Path:
     assert index > 0, "index=0 implies empty directory! Violates the pre-condition!"
     last_pt_rel_path = "weights/last.pt"
+
+    if Path(project_path, f"{model_name}_{index}", last_pt_rel_path).exists():
+        return Path(project_path, f"{model_name}_{index}", last_pt_rel_path)
+
     project_dir = Path(project_path)
     if index == 1:
         current_last_pt = project_dir / model_name / last_pt_rel_path
@@ -128,12 +132,8 @@ def _search_last_pt_recursively(
         prev_last_pt = project_dir / model_name / last_pt_rel_path
         if prev_last_pt.exists():
             return prev_last_pt
-    # index > 2
-    prev_last_pt = project_dir / f"{model_name}_{index - 1}" / last_pt_rel_path
-    if prev_last_pt.exists():
-        return prev_last_pt
-    else:
-        _search_last_pt_recursively(project_dir, model_name, index - 1)
+
+    return _search_last_pt_recursively(project_dir, model_name, index - 1)
 
 
 def _get_last_pt_and_next_model_name(config: dict) -> Tuple[Path, str]:
