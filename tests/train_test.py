@@ -3,7 +3,8 @@ import shutil
 import pytest
 from pathlib import Path
 
-from train import _get_last_pt_path_and_next_model_name
+from train import _get_last_pt_and_next_model_name
+from train import LastPtNotFoundError
 
 
 @pytest.fixture
@@ -43,17 +44,25 @@ def wandb_project_dir(test_resources_dir: Path) -> Path:
     shutil.rmtree(example)
 
 
+@pytest.fixture
+def empty_dir_config(test_resources_dir: Path) -> dict:
+    config = {}
+    config["project_name"] = Path(test_resources_dir, "path/to/dir")
+    config["model_name"] = "model_name"
+    config["project_name"].mkdir(parents=True, exist_ok=True)
+    yield config
+    shutil.rmtree(config["project_name"])
+
+
 @pytest.mark.parametrize("num_runs", [1, 2, 3])
-def test_get_last_pt_path_and_next_model_name_returnsCorrectPathModelname(
+def test_get_last_pt_and_next_model_name_returnsCorrectPathModelname(
     wandb_project_dir, num_runs
 ):
     config = wandb_project_dir(num_runs)
     project_name = config["project_name"]
     model_name = config["model_name"]
 
-    result_last_pt, result_next_model_name = _get_last_pt_path_and_next_model_name(
-        config
-    )
+    result_last_pt, result_next_model_name = _get_last_pt_and_next_model_name(config)
 
     if num_runs == 1:
         correct = Path(project_name, f"{model_name}/weights/last.pt")
@@ -65,9 +74,27 @@ def test_get_last_pt_path_and_next_model_name_returnsCorrectPathModelname(
     assert result_next_model_name == f"{model_name}_{num_runs + 1}"
 
 
-def test_get_last_pt_path_and_next_model_name_noLastPtAsParam_raiseFileNotFoundError():
-    config = {}
-    config["project_name"] = Path("path/to/dir/not/exists")
-    config["model_name"] = Path("model_name")
+def test_get_last_pt_and_next_model_name_noLastPtAsParam_raiseLastPtNotFoundError(
+    empty_dir_config,
+):
+    project_name = empty_dir_config["project_name"]
+    model_name = empty_dir_config["model_name"]
+    Path(project_name, model_name, "weights").mkdir(parents=True, exist_ok=True)
+    with pytest.raises(LastPtNotFoundError):
+        _get_last_pt_and_next_model_name(empty_dir_config)
+
+
+def test_get_last_pt_and_next_model_name_emptDirAsParam_raiseFileNotFoundError(
+    empty_dir_config,
+):
     with pytest.raises(FileNotFoundError):
-        _get_last_pt_path_and_next_model_name(config)
+        _get_last_pt_and_next_model_name(empty_dir_config)
+
+
+def test_get_last_pt_and_next_model_name_noExistingDirAsPam_raiseFileNotFoundError():
+    config = {}
+    config["project_name"] = Path("path/to/dir/not/exist")
+    config["model_name"] = "model_name"
+
+    with pytest.raises(FileNotFoundError):
+        _get_last_pt_and_next_model_name(config)

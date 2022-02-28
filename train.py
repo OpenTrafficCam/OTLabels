@@ -11,7 +11,7 @@ from OTLabels.preprocessing import filter_labels
 from OTLabels.preprocessing import cvat_to_yolo
 
 
-class LastPtFileNotFoundError(Exception):
+class LastPtNotFoundError(Exception):
     def __init__(
         self, msg: str, project_path: Union[str, Path], model_name: str, index: int
     ) -> None:
@@ -52,7 +52,7 @@ def main(config_path):
 
     try:
         # Use last.pt as model weight and create another training session
-        last_pt, next_model_name = _get_last_pt_path_and_next_model_name(config)
+        last_pt, next_model_name = _get_last_pt_and_next_model_name(config)
         train.run(
             weights=last_pt,
             cfg=config["model_cfg"],
@@ -64,7 +64,7 @@ def main(config_path):
             name=next_model_name,
             exist_ok=True,
         )
-    except LastPtFileNotFoundError as lpfnfe:
+    except LastPtNotFoundError as lpfnfe:
         try:
             _last_pt = _search_last_pt_recursively(
                 lpfnfe.last_pt_path, lpfnfe.model_name, lpfnfe.index
@@ -136,14 +136,13 @@ def _search_last_pt_recursively(
         _search_last_pt_recursively(project_dir, model_name, index - 1)
 
 
-def _get_last_pt_path_and_next_model_name(config: dict) -> Tuple[Path, str]:
+def _get_last_pt_and_next_model_name(config: dict) -> Tuple[Path, str]:
     wandb_project_dir = Path(config["project_name"])
     model_name = config["model_name"]
     if not wandb_project_dir.exists():
         raise FileNotFoundError(f"Directory [{wandb_project_dir}]doesn't exist!")
 
     current_idx = len([_dir for _dir in wandb_project_dir.iterdir() if _dir.is_dir()])
-    assert current_idx != 0, f"Empty directory! [{wandb_project_dir}]"
 
     if current_idx == 0:
         raise FileNotFoundError(
@@ -158,7 +157,7 @@ def _get_last_pt_path_and_next_model_name(config: dict) -> Tuple[Path, str]:
 
     next_model_name = f"{model_name}_{current_idx + 1}"
     if not last_pt_path.exists():
-        raise LastPtFileNotFoundError(
+        raise LastPtNotFoundError(
             f"last.pt file not found at: '{last_pt_path}'",
             wandb_project_dir,
             model_name,
