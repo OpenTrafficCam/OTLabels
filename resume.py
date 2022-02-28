@@ -45,7 +45,9 @@ def _get_curr_model_weight_and_name_from_latest_run(
         raise FileNotFoundError(f"Directory [{wandb_project_dir}] doesn't exist!")
 
     current_idx = len([_dir for _dir in wandb_project_dir.iterdir() if _dir.is_dir()])
-    assert current_idx != 0, f"Empty directory! [{wandb_project_dir}]"
+
+    if current_idx == 0:
+        raise FileNotFoundError(f"Empty directory! [{wandb_project_dir}]")
 
     if current_idx == 1:
         latest_run_dir = wandb_project_dir / f"{model_name}"
@@ -61,7 +63,6 @@ def _get_curr_model_weight_and_name_from_latest_run(
     last_pt_path = Path(latest_run_dir, "weights/last.pt")
 
     if not last_pt_path.is_file():
-        # TODO: recursively search for next available
         raise FileNotFoundError(
             f"last.pt file not found at: '{last_pt_path}'! "
             + "\nNot able to resume training."
