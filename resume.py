@@ -20,7 +20,7 @@ def main(config_path, project_path=None, model_name=None, last_pt_path=None):
             (
                 last_pt_path,
                 model_name,
-            ) = _get_current_model_name_and_weight_from_latest_run(config)
+            ) = _get_curr_model_weight_and_name_from_latest_run(config)
 
         train.run(
             cfg=config["model_cfg"],
@@ -36,7 +36,7 @@ def main(config_path, project_path=None, model_name=None, last_pt_path=None):
         print(fnfe)
 
 
-def _get_current_model_name_and_weight_from_latest_run(
+def _get_curr_model_weight_and_name_from_latest_run(
     config: dict,
 ) -> Tuple[Path, str]:
     wandb_project_dir = Path(config["project_name"])
