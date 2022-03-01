@@ -175,14 +175,20 @@ def _get_bboxes(label_path):
         label_path(str|PosixPath): Path to text file in YOLOv5 annotation format.
 
     Returns:
-        A list containing the bounding box values in the form of [x, y, w, h].
+        A list containing the bounding box values in the form of [cls, x, y, w, h].
     """
     with open(label_path, "r", errors="ignore") as f:
         lines = [line.rstrip("\n") for line in f.readlines()]
         bboxes = []
         for line in lines:
             vals = line.split(" ")
-            bbox = [float(vals[1]), float(vals[2]), float(vals[3]), float(vals[4])]
+            bbox = [
+                int(vals[0]),
+                float(vals[1]),
+                float(vals[2]),
+                float(vals[3]),
+                float(vals[4]),
+            ]
             bboxes.append(bbox)
         return bboxes
 

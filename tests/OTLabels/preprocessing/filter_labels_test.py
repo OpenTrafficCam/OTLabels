@@ -108,13 +108,21 @@ def test_bbox_to_img_area_ratio_lt_thresh_bboxValuesGtImg_RaiseAssertionError(im
 def test_get_bboxes_validAnnPath_returnsCorrectBBoxes(ann_path_list):
     ann_path = ann_path_list[0]
     bboxes = _get_bboxes(ann_path)
-    b1_x, b1_y, b1_w, b1_h = bboxes[0]
-    b2_x, b2_y, b2_w, b2_h = bboxes[1]
+    b1_cls, b1_x, b1_y, b1_w, b1_h = bboxes[0]
+    b2_cls, b2_x, b2_y, b2_w, b2_h = bboxes[1]
 
-    assert len(bboxes) == 2 and len(bboxes[0]) == 4 and len(bboxes[1]) == 4
+    assert len(bboxes) == 2 and len(bboxes[0]) == 5 and len(bboxes[1]) == 5
     assert (
-        b1_x == 0.686445 and b1_y == 0.53196 and b1_w == 0.082891 and b1_h == 0.323967
+        b1_cls == 0
+        and b1_x == 0.686445
+        and b1_y == 0.53196
+        and b1_w == 0.082891
+        and b1_h == 0.323967
     )
     assert (
-        b2_x == 0.612484 and b2_y == 0.446197 and b2_w == 0.023625 and b2_h == 0.083897
+        b2_cls == 0
+        and b2_x == 0.612484
+        and b2_y == 0.446197
+        and b2_w == 0.023625
+        and b2_h == 0.083897
     )
