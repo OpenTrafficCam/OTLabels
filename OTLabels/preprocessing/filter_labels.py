@@ -193,12 +193,24 @@ def _get_bboxes(label_path):
         return bboxes
 
 
-def _bbox_to_img_area_ratio_lt_thresh(
-    bbox_width, bbox_height, img_width, img_height, thresh
+def _is_bbox_to_img_area_ratio_in_thresh(
+    bbox_width,
+    bbox_height,
+    img_width,
+    img_height,
+    lower_thresh: float,
+    upper_thresh: float,
 ):
     assert (
-        0 <= thresh and thresh <= 1
-    ), f"Threshhold must be a value between [0,1]. Actual value:{thresh}"
+        lower_thresh < upper_thresh
+        and lower_thresh >= 0
+        and lower_thresh <= 1
+        and upper_thresh >= 0
+        and upper_thresh <= 1
+    ), (
+        "Condition that 0 <= 'lower_thresh <= upper_thresh' < 1 not fulfilled.\n"
+        + f"Actual value: lower_thresh = {lower_thresh}, upper_thresh = {upper_thresh}"
+    )
 
     if img_width < 0 or img_height < 0:
         img_size_neg_error_msg = (
@@ -221,7 +233,9 @@ def _bbox_to_img_area_ratio_lt_thresh(
         + f"Actual values: bbox area={bbox_area} | img area={img_area}"
     )
 
-    return (bbox_area / img_area) < thresh
+    bbox_to_img_ratio = bbox_area / img_area
+
+    return lower_thresh <= bbox_to_img_ratio and bbox_to_img_ratio <= upper_thresh
 
 
 def main(path, labels_filter, force_filtering=False):
