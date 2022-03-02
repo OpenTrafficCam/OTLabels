@@ -16,8 +16,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # TODO: docstrings in filter_labels
-from typing import Union
-
 from pathlib import Path
 from PIL import Image
 import pandas as pd
@@ -74,7 +72,7 @@ def _filter_labels(
     sample=1.0,
     reset_label_ids=False,
 ):
-    source_dir = Path(path, f"labels/{name}")
+    labels_dir = Path(path, f"labels/{name}")
     image_dir = Path(path, f"images/{name}")
     dest_dir_labels = Path(path, f"labels/{name}_filtered_{appendix}")
     dest_dir_imgs = Path(path, f"images/{name}_filtered_{appendix}")
@@ -99,13 +97,13 @@ def _filter_labels(
     Path(dest_dir_imgs).mkdir(parents=True)
 
     labels = pd.read_csv(labels_filter)
-    ann_files = _file_list(source_dir, "txt")
+    ann_files = _file_list(labels_dir, "txt")
 
     if reset_label_ids:
         label_dict = _reset_labels(labels)
 
     print(
-        f"Filter files in {source_dir} by labels "
+        f"Filter files in {labels_dir} by labels "
         + ", ".join(str(e) for e in labels["Cat"].tolist())
         + "..."
     )
@@ -113,14 +111,14 @@ def _filter_labels(
     rel_image_path_list = []
     image_list_source = []
     n = 0
-    for f in tqdm(ann_files):
+    for ann_file in tqdm(ann_files):
 
         write = random.uniform(0, 1) < sample
 
-        file_name = Path(f).name
+        file_name = Path(ann_file).name
         image_name = Path(file_name).stem + img_type
-        if _has_data(f):
-            file_labels = pd.read_csv(f, header=None, sep=" ")
+        if _has_data(ann_file):
+            file_labels = pd.read_csv(ann_file, header=None, sep=" ")
         else:
             continue
 
@@ -156,8 +154,8 @@ def _filter_labels(
     file_filtered_labels = Path(path, f"{name}_filtered_{appendix}.txt")
     print(f"Writing file with filtered labels to {file_filtered_labels} ...")
 
-    with open(file_filtered_labels, "w") as f:
-        f.write("\n".join(rel_image_path_list))
+    with open(file_filtered_labels, "w") as ann_file:
+        ann_file.write("\n".join(rel_image_path_list))
 
     print(f"Copying {len(rel_image_path_list)} images to {dest_dir_imgs} ...")
     for img in tqdm(image_list_source):
@@ -167,42 +165,30 @@ def _filter_labels(
 
 
 def _filter_bboxes_with_bbox_img_ratio(
-    img_paths: Union[str, Path],
-    normalized: bool,
+    anns: pd.DataFrame,
+    img_width,
+    img_height,
     lower_thresh: float = 0,
     upper_thresh: float = 1,
 ) -> list:
     """Bounding boxes need to be in xywh format"""
     # get bboxes
-    if not img_paths:
+    if len(anns.index) == 0:
         return []
 
-    # Assume img_paths contained in YOLOv5 annotation directory
-    filtered_img_anns = []
-    for img_path in img_paths:
-        dets = []
-        img_labels_path = _get_cvat_yolo_ann_path_from_img_path(img_path)
-        bboxes = _get_bboxes(img_labels_path)
-
-        if normalized:
-            img_width = 1
-            img_height = 1
-        else:
-            img_width, img_height = Image.open(img_path).size
-
-        for bbox in bboxes:
-            cls, x, y, w, h = bbox
-            if _is_bbox_to_img_area_ratio_in_thresh(
-                bbox_width=w,
-                bbox_height=h,
-                img_width=img_width,
-                img_height=img_height,
-                lower_thresh=lower_thresh,
-                upper_thresh=upper_thresh,
-            ):
-                dets.append([cls, x, y, w, h])
-        filtered_img_anns.append(dets)
-    return filtered_img_anns
+    filtered_bbox_anns = []
+    for _, bbox in anns.iterrows():
+        _cls, x, y, w, h = bbox.tolist()
+        if _is_bbox_to_img_area_ratio_in_thresh(
+            bbox_width=w,
+            bbox_height=h,
+            img_width=img_width,
+            img_height=img_height,
+            lower_thresh=lower_thresh,
+            upper_thresh=upper_thresh,
+        ):
+            filtered_bbox_anns.append([int(_cls), x, y, w, h])
+    return filtered_bbox_anns
 
 
 def _get_cvat_yolo_ann_path_from_img_path(img_path: Path):

@@ -1,13 +1,13 @@
-from genericpath import isfile
 import shutil
 
 import pytest
 from pathlib import Path
+import pandas as pd
+from PIL import Image
 
 from OTLabels.preprocessing.filter_labels import _is_bbox_to_img_area_ratio_in_thresh
 from OTLabels.preprocessing.filter_labels import _get_bboxes
 from OTLabels.preprocessing.filter_labels import _get_cvat_yolo_ann_path_from_img_path
-
 from OTLabels.preprocessing.filter_labels import _filter_bboxes_with_bbox_img_ratio
 
 
@@ -46,6 +46,12 @@ def ann_path_list(test_dataset_dir):
         Path(test_dataset_dir, "labels/000000000872.txt"),
         Path(test_dataset_dir, "labels/000000000885.txt"),
     ]
+
+
+@pytest.fixture
+def df_anns(ann_path_list):
+    dfs = [pd.read_csv(ann_path, header=None, sep=" ") for ann_path in ann_path_list]
+    return dfs
 
 
 @pytest.fixture
@@ -203,26 +209,30 @@ def test_get_cvat_yolo_ann_path_from_img_path_withNotExistingLabels_returnsFalse
     assert ann_path == Path("path/to/dir/labels/frame_1.txt")
 
 
-def test_filter_bboxes_with_bbox_img_ratio_noThreshApplied_returnsSameDets(
-    img_path_list,
+def test_filter_bboxes_with_bbox_img_ratio_noThreshApplied_normalized_returnsSameDets(
+    df_anns,
 ):
-    filtered_dets = _filter_bboxes_with_bbox_img_ratio(
-        img_paths=img_path_list, normalized=True, lower_thresh=0, upper_thresh=1
-    )
-    assert len(filtered_dets) == len(img_path_list)
+    for df_ann in df_anns:
+        filtered_dets = _filter_bboxes_with_bbox_img_ratio(
+            anns=df_ann, img_height=1, img_width=1, lower_thresh=0, upper_thresh=1
+        )
+        assert len(filtered_dets) == len(df_ann.index)
 
 
-def test_filter_bboxes_with_bbox_img_ratio_threshSetToDiscardAll_returnsNoDets(
+def test_filter_bboxes_with_bbox_img_ratio_threshDiscardAll_normalized_returnsNoDets(
     img_path_list,
+    df_anns,
 ):
-    filtered_dets = _filter_bboxes_with_bbox_img_ratio(
-        img_paths=img_path_list,
-        normalized=True,
-        lower_thresh=0,
-        upper_thresh=0,
-    )
-    for img_bboxes in filtered_dets:
-        assert len(img_bboxes) == 0
+    for df_ann in df_anns:
+        filtered_dets = _filter_bboxes_with_bbox_img_ratio(
+            anns=df_ann,
+            img_width=1,
+            img_height=1,
+            lower_thresh=0,
+            upper_thresh=0,
+        )
+        for img_bboxes in filtered_dets:
+            assert len(img_bboxes) == 0
 
 
 def test_filter_bboxes_with_bbox_img_ration_normalizedFalseAsParam_returnDets(
@@ -233,11 +243,24 @@ def test_filter_bboxes_with_bbox_img_ration_normalizedFalseAsParam_returnDets(
         for img_path in Path(example_yolov5_dir, "images").iterdir()
         if img_path.is_file()
     ]
-    filtered_dets = _filter_bboxes_with_bbox_img_ratio(
-        img_paths=img_paths,
-        normalized=False,
-        lower_thresh=0.1,
-        upper_thresh=1,
-    )
-    assert len(filtered_dets[0]) == 1
-    assert len(filtered_dets[1]) == 0
+    df_anns = [
+        pd.read_csv(ann_path, header=None, sep=" ")
+        for ann_path in Path(example_yolov5_dir, "labels").iterdir()
+        if ann_path.is_file()
+    ]
+
+    filtered_bboxes = []
+    for img_path, df_ann in zip(img_paths, df_anns):
+        img_width, img_height = Image.open(img_path).size
+
+        filtered_bbox_of_img = _filter_bboxes_with_bbox_img_ratio(
+            anns=df_ann,
+            img_width=img_width,
+            img_height=img_height,
+            lower_thresh=0.1,
+            upper_thresh=1,
+        )
+        filtered_bboxes.append(filtered_bbox_of_img)
+
+    assert len(filtered_bboxes[0]) == 1
+    assert len(filtered_bboxes[1]) == 0
