@@ -1,8 +1,14 @@
+from genericpath import isfile
+import shutil
+
 import pytest
 from pathlib import Path
 
 from OTLabels.preprocessing.filter_labels import _is_bbox_to_img_area_ratio_in_thresh
 from OTLabels.preprocessing.filter_labels import _get_bboxes
+from OTLabels.preprocessing.filter_labels import _get_cvat_yolo_ann_path_from_img_path
+
+from OTLabels.preprocessing.filter_labels import _filter_bboxes_with_bbox_img_ratio
 
 
 @pytest.fixture
@@ -40,6 +46,36 @@ def ann_path_list(test_dataset_dir):
         Path(test_dataset_dir, "labels/000000000872.txt"),
         Path(test_dataset_dir, "labels/000000000885.txt"),
     ]
+
+
+@pytest.fixture
+def example_yolov5_dir(test_resources_dir, img_path_list: list[Path]):
+    """Creates an example YOLOv5 containing images and labels."""
+    test_example_dir = Path(test_resources_dir, "test_example")
+    img_dir = test_example_dir / "images"
+    labels_dir = test_example_dir / "labels"
+    img_dir.mkdir(exist_ok=True, parents=True)
+    labels_dir.mkdir(exist_ok=True, parents=True)
+
+    anns = [
+        ["0 75 75 300 400", "4 12 17 10 10"],
+        ["5 1 1 10 10", "21 4 4 1 1"],
+    ]
+    # Copy images to temp folder
+    for img_path, ann in zip(img_path_list[0:2], anns):
+        dst = Path(img_dir, f"{img_path.name}")
+        shutil.copyfile(src=img_path, dst=dst)
+
+        # Create ann_files
+        ann_path = Path(test_example_dir, f"labels/{img_path.stem}.txt")
+        ann_path.touch(exist_ok=True)
+        with open(ann_path, "w") as f:
+            for a in ann:
+                f.write(a)
+                f.write("\n")
+
+    yield test_example_dir
+    shutil.rmtree(test_example_dir)
 
 
 @pytest.mark.parametrize(
@@ -150,3 +186,58 @@ def test_get_bboxes_validAnnPath_returnsCorrectBBoxes(ann_path_list):
         and b2_w == 0.023625
         and b2_h == 0.083897
     )
+
+
+def test_get_cvat_yolo_ann_path_from_img_path_withExistingLabels_returnsTrue(
+    img_path_list,
+):
+    for img_path in img_path_list:
+        ann_path = _get_cvat_yolo_ann_path_from_img_path(img_path)
+        assert ann_path.is_file()
+
+
+def test_get_cvat_yolo_ann_path_from_img_path_withNotExistingLabels_returnsFalse():
+    example_img_path = Path("path/to/dir/images/frame_1.jpeg")
+    ann_path = _get_cvat_yolo_ann_path_from_img_path(example_img_path)
+    assert not ann_path.is_file()
+    assert ann_path == Path("path/to/dir/labels/frame_1.txt")
+
+
+def test_filter_bboxes_with_bbox_img_ratio_noThreshApplied_returnsSameDets(
+    img_path_list,
+):
+    filtered_dets = _filter_bboxes_with_bbox_img_ratio(
+        img_paths=img_path_list, normalized=True, lower_thresh=0, upper_thresh=1
+    )
+    assert len(filtered_dets) == len(img_path_list)
+
+
+def test_filter_bboxes_with_bbox_img_ratio_threshSetToDiscardAll_returnsNoDets(
+    img_path_list,
+):
+    filtered_dets = _filter_bboxes_with_bbox_img_ratio(
+        img_paths=img_path_list,
+        normalized=True,
+        lower_thresh=0,
+        upper_thresh=0,
+    )
+    for img_bboxes in filtered_dets:
+        assert len(img_bboxes) == 0
+
+
+def test_filter_bboxes_with_bbox_img_ration_normalizedFalseAsParam_returnDets(
+    example_yolov5_dir,
+):
+    img_paths = [
+        img_path
+        for img_path in Path(example_yolov5_dir, "images").iterdir()
+        if img_path.is_file()
+    ]
+    filtered_dets = _filter_bboxes_with_bbox_img_ratio(
+        img_paths=img_paths,
+        normalized=False,
+        lower_thresh=0.1,
+        upper_thresh=1,
+    )
+    assert len(filtered_dets[0]) == 1
+    assert len(filtered_dets[1]) == 0

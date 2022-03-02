@@ -16,8 +16,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # TODO: docstrings in filter_labels
+from typing import Union
 
 from pathlib import Path
+from PIL import Image
 import pandas as pd
 import shutil
 import random
@@ -162,6 +164,49 @@ def _filter_labels(
         shutil.copy(img, dest_dir_imgs)
 
     print("Done!")
+
+
+def _filter_bboxes_with_bbox_img_ratio(
+    img_paths: Union[str, Path],
+    normalized: bool,
+    lower_thresh: float = 0,
+    upper_thresh: float = 1,
+) -> list:
+    """Bounding boxes need to be in xywh format"""
+    # get bboxes
+    if not img_paths:
+        return []
+
+    # Assume img_paths contained in YOLOv5 annotation directory
+    filtered_img_anns = []
+    for img_path in img_paths:
+        dets = []
+        img_labels_path = _get_cvat_yolo_ann_path_from_img_path(img_path)
+        bboxes = _get_bboxes(img_labels_path)
+
+        if normalized:
+            img_width = 1
+            img_height = 1
+        else:
+            img_width, img_height = Image.open(img_path).size
+
+        for bbox in bboxes:
+            cls, x, y, w, h = bbox
+            if _is_bbox_to_img_area_ratio_in_thresh(
+                bbox_width=w,
+                bbox_height=h,
+                img_width=img_width,
+                img_height=img_height,
+                lower_thresh=lower_thresh,
+                upper_thresh=upper_thresh,
+            ):
+                dets.append([cls, x, y, w, h])
+        filtered_img_anns.append(dets)
+    return filtered_img_anns
+
+
+def _get_cvat_yolo_ann_path_from_img_path(img_path: Path):
+    return Path(img_path.parent.with_stem("labels"), f"{img_path.stem}.txt")
 
 
 def _get_bboxes(label_path):
