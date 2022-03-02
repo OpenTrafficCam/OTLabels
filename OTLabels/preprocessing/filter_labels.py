@@ -202,13 +202,13 @@ def _is_bbox_to_img_area_ratio_in_thresh(
     upper_thresh: float,
 ):
     assert (
-        lower_thresh < upper_thresh
+        lower_thresh <= upper_thresh
         and lower_thresh >= 0
         and lower_thresh <= 1
         and upper_thresh >= 0
         and upper_thresh <= 1
     ), (
-        "Condition that 0 <= 'lower_thresh <= upper_thresh' < 1 not fulfilled.\n"
+        "Condition that 0 <= 'lower_thresh <= upper_thresh' <= 1 not fulfilled.\n"
         + f"Actual value: lower_thresh = {lower_thresh}, upper_thresh = {upper_thresh}"
     )
 
