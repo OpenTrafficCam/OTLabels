@@ -5,10 +5,11 @@ from pathlib import Path
 import pandas as pd
 from PIL import Image
 
-from OTLabels.preprocessing.filter_labels import _is_bbox_to_img_area_ratio_in_thresh
+from OTLabels.preprocessing.filter_labels import _is_bbox_to_img_ratio_in_thresh
 from OTLabels.preprocessing.filter_labels import _get_bboxes
 from OTLabels.preprocessing.filter_labels import _get_cvat_yolo_ann_path_from_img_path
 from OTLabels.preprocessing.filter_labels import _filter_bboxes_with_bbox_img_ratio
+from OTLabels.preprocessing.filter_labels import _calc_bbox_to_img_ratio
 
 
 @pytest.fixture
@@ -85,90 +86,93 @@ def example_yolov5_dir(test_resources_dir, img_path_list: list[Path]):
 
 
 @pytest.mark.parametrize(
-    "bbox_size,thresh", [([40, 20], [0.3, 1]), ([400, 400], [0.3, 0.5])]
+    "bbox_to_img_ratio,thresh", [(0.29, [0.3, 1]), (0.55, [0.3, 0.5])]
 )
-def test_is_bbox_to_img_area_ratio_in_thresh_ratioOutsideThresh_returnsFalse(
-    img_size, bbox_size, thresh
+def test_is_bbox_to_img_ratio_in_thresh_ratioOutsideThresh_returnsFalse(
+    bbox_to_img_ratio, thresh
 ):
-    img_width, img_height = img_size
-    bbox_width, bbox_height = bbox_size
     lower_thresh, upper_thresh = thresh
-    assert not _is_bbox_to_img_area_ratio_in_thresh(
-        bbox_width=bbox_width,
-        bbox_height=bbox_height,
-        img_width=img_width,
-        img_height=img_height,
+
+    assert not _is_bbox_to_img_ratio_in_thresh(
+        bbox_to_img_ratio=bbox_to_img_ratio,
         lower_thresh=lower_thresh,
         upper_thresh=upper_thresh,
     )
 
 
 @pytest.mark.parametrize(
-    "bbox_size,thresh",
-    [([0, 0], [0, 1]), ([640, 480], [0, 1]), ([324, 171], [0.15, 0.5])],
+    "bbox_to_img_ratio,thresh",
+    [
+        (0, [0, 1]),
+        (1, [0, 1]),
+        (0.15, [0.15, 0.5]),
+        (0.5, [0.15, 0.5]),
+        (0.25, [0.15, 0.5]),
+    ],
 )
-def test_is_bbox_to_img_area_ratio_in_thresh_ratioInsideThresh_returnsTrue(
-    img_size, bbox_size, thresh
+def test_is_bbox_to_img_ratio_in_thresh_ratioInsideThresh_returnsTrue(
+    bbox_to_img_ratio, thresh
 ):
-    img_width, img_height = img_size
-    bbox_width, bbox_height = bbox_size
     lower_thresh, upper_thresh = thresh
-    assert _is_bbox_to_img_area_ratio_in_thresh(
-        bbox_width=bbox_width,
-        bbox_height=bbox_height,
-        img_width=img_width,
-        img_height=img_height,
+    assert _is_bbox_to_img_ratio_in_thresh(
+        bbox_to_img_ratio=bbox_to_img_ratio,
         lower_thresh=lower_thresh,
         upper_thresh=upper_thresh,
     )
 
 
-def test_is_bbox_to_img_area_ratio_in_thresh_negImgSizeValues_RaiseValueError(
-    neg_img_size,
-):
-    img_width, img_height = neg_img_size
-
+def test_calc_bbox_to_img_ratio_negImgSizeValues_RaiseValueError():
     with pytest.raises(ValueError) as ve:
-        _is_bbox_to_img_area_ratio_in_thresh(
-            bbox_width=400,
-            bbox_height=400,
-            img_width=img_width,
-            img_height=img_height,
-            lower_thresh=0.3,
-            upper_thresh=1,
+        _calc_bbox_to_img_ratio(
+            bbox_width=400, bbox_height=400, img_width=-1, img_height=-30
         )
-    assert "Image width and height must be positive values." in str(ve.value)
+    assert "Image width and height must be positive values greater than 0." in str(
+        ve.value
+    )
 
 
-def test_is_bbox_to_img_area_ratio_in_thresh_negBboxValues_RaiseValueError(img_size):
-    img_width, img_height = img_size
-
+def test_calc_bbox_to_img_ratio_negBboxValues_RaiseValueError():
     with pytest.raises(ValueError) as ve:
-        _is_bbox_to_img_area_ratio_in_thresh(
+        _calc_bbox_to_img_ratio(
             bbox_width=-400,
             bbox_height=-400,
-            img_width=img_width,
-            img_height=img_height,
-            lower_thresh=0.3,
-            upper_thresh=1,
+            img_width=500,
+            img_height=400,
         )
-    assert "Bbox width and height must be positive values." in str(ve.value)
+    assert "Bbox width and height must be positive values greater than 0." in str(
+        ve.value
+    )
 
 
-def test_is_bbox_to_img_area_ratio_in_thresh_bboxValuesGtImg_RaiseAssertionError(
+def test_calc_bbox_to_img_ratio_bboxValuesGtImg_RaiseAssertionError(
     img_size,
 ):
     img_width, img_height = img_size
 
-    with pytest.raises(AssertionError):
-        _is_bbox_to_img_area_ratio_in_thresh(
+    with pytest.raises(ValueError) as ve:
+        _calc_bbox_to_img_ratio(
             bbox_width=800,
             bbox_height=800,
             img_width=img_width,
             img_height=img_height,
-            lower_thresh=0,
-            upper_thresh=1,
         )
+    assert "Bounding box area is greater than image." in str(ve.value)
+
+
+@pytest.mark.parametrize(
+    "bbox_width,bbox_height,img_width,img_height,expected",
+    [(400, 400, 800, 800, 0.25), (400, 400, 400, 400, 1)],
+)
+def test_calc_bbox_to_img_ratio_validBboxAndImgVals_returnsCorrectRatio(
+    bbox_width, bbox_height, img_width, img_height, expected
+):
+    bbox_to_img_ratio = _calc_bbox_to_img_ratio(
+        bbox_width=bbox_width,
+        bbox_height=bbox_height,
+        img_width=img_width,
+        img_height=img_height,
+    )
+    assert bbox_to_img_ratio == expected
 
 
 def test_get_bboxes_validAnnPath_returnsCorrectBBoxes(ann_path_list):

@@ -129,8 +129,6 @@ def _filter_labels(
         image_name = Path(file_name).stem + img_type
         if _has_data(ann_file):
             file_labels = pd.read_csv(ann_file, header=None, sep=" ")
-        else:
-            continue
 
         file_labels = file_labels[file_labels[0].isin(labels["CatId"])]
 
@@ -160,13 +158,13 @@ def _filter_labels(
                         dest=Path(dest_dir_labels, file_name),
                     )
                 else:
-                file_labels.to_csv(
-                    Path(dest_dir_labels, file_name),
-                    header=False,
-                    sep=" ",
-                    index=False,
-                    line_terminator="\n",
-                )
+                    file_labels.to_csv(
+                        Path(dest_dir_labels, file_name),
+                        header=False,
+                        sep=" ",
+                        index=False,
+                        line_terminator="\n",
+                    )
                 rel_image_path_list.append(
                     "./" + str(Path(dest_dir_imgs_relative, image_name))
                 )
@@ -209,11 +207,11 @@ def _filter_bboxes_with_bbox_img_ratio(
     filtered_bbox_anns = []
     for _, bbox in anns.iterrows():
         _cls, x, y, w, h = bbox.tolist()
-        if _is_bbox_to_img_area_ratio_in_thresh(
-            bbox_width=w,
-            bbox_height=h,
-            img_width=img_width,
-            img_height=img_height,
+        bbox_to_img_area_ratio = _calc_bbox_to_img_ratio(
+            bbox_width=w, bbox_height=h, img_width=img_width, img_height=img_height
+        )
+        if _is_bbox_to_img_ratio_in_thresh(
+            bbox_to_img_ratio=bbox_to_img_area_ratio,
             lower_thresh=lower_thresh,
             upper_thresh=upper_thresh,
         ):
@@ -254,11 +252,40 @@ def _get_bboxes(label_path):
         return bboxes
 
 
-def _is_bbox_to_img_area_ratio_in_thresh(
-    bbox_width,
-    bbox_height,
-    img_width,
-    img_height,
+def _calc_bbox_to_img_ratio(
+    bbox_width: float, bbox_height: float, img_width: float, img_height: float
+):
+    if img_width <= 0 or img_height <= 0:
+        img_size_neg_error_msg = (
+            "Image width and height must be positive values greater than 0. "
+            + f"Actual values: width={img_width} | height={img_height}"
+        )
+        raise ValueError(img_size_neg_error_msg)
+
+    if bbox_width < 0 or bbox_height < 0:
+        bbox_neg_error_msg = (
+            "Bbox width and height must be positive values greater than 0. "
+            + f"Actual values: width={bbox_width} | height={bbox_height}"
+        )
+        raise ValueError(bbox_neg_error_msg)
+
+    bbox_area = bbox_width * bbox_height
+    img_area = img_width * img_height
+
+    if bbox_area > img_area:
+        err_msg = (
+            "Bounding box area is greater than image. "
+            + f"Actual values: bbox area={bbox_area} | img area={img_area}"
+        )
+        raise ValueError(err_msg)
+
+    bbox_to_img_ratio = bbox_area / img_area
+    assert bbox_to_img_ratio <= 1 and bbox_to_img_ratio >= 0
+    return bbox_to_img_ratio
+
+
+def _is_bbox_to_img_ratio_in_thresh(
+    bbox_to_img_ratio: float,
     lower_thresh: float,
     upper_thresh: float,
 ):
@@ -272,29 +299,6 @@ def _is_bbox_to_img_area_ratio_in_thresh(
         "Condition that 0 <= 'lower_thresh <= upper_thresh' <= 1 not fulfilled.\n"
         + f"Actual value: lower_thresh = {lower_thresh}, upper_thresh = {upper_thresh}"
     )
-
-    if img_width < 0 or img_height < 0:
-        img_size_neg_error_msg = (
-            "Image width and height must be positive values. "
-            + f"Actual values: width={img_width} | height={img_height}"
-        )
-        raise ValueError(img_size_neg_error_msg)
-
-    if bbox_width < 0 or bbox_height < 0:
-        bbox_neg_error_msg = (
-            "Bbox width and height must be positive values. "
-            + f"Actual values: width={bbox_width} | height={bbox_height}"
-        )
-        raise ValueError(bbox_neg_error_msg)
-    bbox_area = bbox_width * bbox_height
-    img_area = img_width * img_height
-
-    assert not bbox_area > img_area, (
-        "Bounding box area is greater than image. "
-        + f"Actual values: bbox area={bbox_area} | img area={img_area}"
-    )
-
-    bbox_to_img_ratio = bbox_area / img_area
 
     return lower_thresh <= bbox_to_img_ratio and bbox_to_img_ratio <= upper_thresh
 
