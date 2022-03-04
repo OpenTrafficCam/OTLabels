@@ -25,6 +25,9 @@ import shutil
 import random
 from tqdm import tqdm
 
+from ..helpers.files import get_yolov5_img_path_from_ann_path
+from ..helpers.files import write_yolov5_anns_to_file
+
 
 def _reset_labels(labels):
     label_dict = {}
@@ -137,6 +140,26 @@ def _filter_labels(
                 file_labels = file_labels.dropna()
                 file_labels[0] = file_labels[0].astype(int)
             if write:
+                if apply_thresh_filter:
+                    if normalized:
+                        img_width = 1
+                        img_height = 1
+                    else:
+                        img_path = get_yolov5_img_path_from_ann_path(ann_file, img_type)
+                        img_width, img_height = Image.open(img_path).size
+
+                    thresh_filtered_labels = _filter_bboxes_with_bbox_img_ratio(
+                        anns=file_labels,
+                        img_width=img_width,
+                        img_height=img_height,
+                        lower_thresh=lower_thresh,
+                        upper_thresh=upper_thresh,
+                    )
+                    write_yolov5_anns_to_file(
+                        anns=thresh_filtered_labels,
+                        dest=Path(dest_dir_labels, file_name),
+                    )
+                else:
                 file_labels.to_csv(
                     Path(dest_dir_labels, file_name),
                     header=False,
