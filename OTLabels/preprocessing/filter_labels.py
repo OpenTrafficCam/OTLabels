@@ -16,6 +16,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # TODO: docstrings in filter_labels
+from typing import Union
+
 from pathlib import Path
 from PIL import Image
 import pandas as pd
@@ -63,14 +65,19 @@ def _has_data(file_path):
 
 
 def _filter_labels(
-    labels_filter,
-    path,
-    name,
-    appendix,
-    num_background,
-    force_filtering,
+    labels_filter: Union[str, Path],
+    path: Union[str, Path],
+    name: str,
+    appendix: str,
+    num_background: int,
+    force_filtering: bool,
+    normalized,
     sample=1.0,
-    reset_label_ids=False,
+    lower_thresh: float = 0,
+    upper_thresh: float = 1,
+    apply_thresh_filter: bool = False,
+    reset_label_ids: bool = False,
+    discard_img_above_thresh: bool = False,
 ):
     labels_dir = Path(path, f"labels/{name}")
     image_dir = Path(path, f"images/{name}")
