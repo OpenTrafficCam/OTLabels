@@ -10,6 +10,8 @@ from OTLabels.preprocessing.filter_labels import _get_bboxes
 from OTLabels.preprocessing.filter_labels import _get_cvat_yolo_ann_path_from_img_path
 from OTLabels.preprocessing.filter_labels import _filter_bboxes_with_bbox_img_ratio
 from OTLabels.preprocessing.filter_labels import _calc_bbox_to_img_ratio
+from OTLabels.preprocessing.filter_labels import _is_in_cls_labels
+from OTLabels.preprocessing.filter_labels import _change_bboxes_cls_ids
 
 
 @pytest.fixture
@@ -216,30 +218,36 @@ def test_get_cvat_yolo_ann_path_from_img_path_withNotExistingLabels_returnsFalse
 def test_filter_bboxes_with_bbox_img_ratio_noThreshApplied_normalized_returnsSameDets(
     df_anns,
 ):
-    for df_ann in df_anns:
-        filtered_dets = _filter_bboxes_with_bbox_img_ratio(
-            anns=df_ann, img_height=1, img_width=1, lower_thresh=0, upper_thresh=1
-        )
-        assert len(filtered_dets) == len(df_ann.index)
+    bboxes = [
+        [1, 0.4, 0.4, 0.8, 0.8],
+        [1, 0.4, 0.4, 0.01, 0.01],
+        [1, 0.4, 0.4, 1, 1],
+    ]
+    filtered_dets, discarded = _filter_bboxes_with_bbox_img_ratio(
+        anns=bboxes, img_height=1, img_width=1, lower_thresh=0, upper_thresh=1
+    )
+    assert len(filtered_dets) == len(bboxes)
+    assert len(discarded) == 0
 
 
-def test_filter_bboxes_with_bbox_img_ratio_threshDiscardAll_normalized_returnsNoDets(
-    img_path_list,
-    df_anns,
-):
-    for df_ann in df_anns:
-        filtered_dets = _filter_bboxes_with_bbox_img_ratio(
-            anns=df_ann,
-            img_width=1,
-            img_height=1,
-            lower_thresh=0,
-            upper_thresh=0,
-        )
-        for img_bboxes in filtered_dets:
-            assert len(img_bboxes) == 0
+def test_filter_bboxes_with_bbox_img_ratio_threshDiscardAll_normalized_returnsNoDets():
+    bboxes = [
+        [1, 0.4, 0.4, 0.8, 0.8],
+        [1, 0.4, 0.4, 0.01, 0.01],
+        [1, 0.4, 0.4, 1, 1],
+    ]
+    kept_bboxes, discarded = _filter_bboxes_with_bbox_img_ratio(
+        anns=bboxes,
+        img_width=1,
+        img_height=1,
+        lower_thresh=0,
+        upper_thresh=0,
+    )
+    assert len(kept_bboxes) == 0
+    assert len(discarded) == 3
 
 
-def test_filter_bboxes_with_bbox_img_ration_normalizedFalseAsParam_returnDets(
+def test_filter_bboxes_with_bbox_img_ratio_normalizedFalseAsParam_returnDets(
     example_yolov5_dir,
 ):
     img_paths = [
@@ -247,24 +255,84 @@ def test_filter_bboxes_with_bbox_img_ration_normalizedFalseAsParam_returnDets(
         for img_path in Path(example_yolov5_dir, "images").iterdir()
         if img_path.is_file()
     ]
-    df_anns = [
-        pd.read_csv(ann_path, header=None, sep=" ")
+    anns = [
+        _get_bboxes(ann_path)
         for ann_path in Path(example_yolov5_dir, "labels").iterdir()
         if ann_path.is_file()
     ]
 
     filtered_bboxes = []
-    for img_path, df_ann in zip(img_paths, df_anns):
+    discarded_bboxes = []
+    for img_path, ann in zip(img_paths, anns):
         img_width, img_height = Image.open(img_path).size
 
-        filtered_bbox_of_img = _filter_bboxes_with_bbox_img_ratio(
-            anns=df_ann,
+        (
+            filtered_bbox_of_img,
+            bbox_img_ratio_of_discarded_bboxes,
+        ) = _filter_bboxes_with_bbox_img_ratio(
+            anns=ann,
             img_width=img_width,
             img_height=img_height,
             lower_thresh=0.1,
             upper_thresh=1,
         )
         filtered_bboxes.append(filtered_bbox_of_img)
+        discarded_bboxes.append(bbox_img_ratio_of_discarded_bboxes)
+        assert len(filtered_bbox_of_img) + len(
+            bbox_img_ratio_of_discarded_bboxes
+        ) == len(ann)
 
     assert len(filtered_bboxes[0]) == 1
+    assert len(discarded_bboxes[0]) == 1
     assert len(filtered_bboxes[1]) == 0
+    assert len(discarded_bboxes[1]) == 2
+
+
+def test_is_in_cls_labels():
+    class_labels = {
+        "person": 0,
+        "car": 1,
+        "bycicle": 2,
+    }
+
+    bbox_1 = [1, 0.5, 0.4, 0.7, 0, 6]
+    bbox_2 = [5, 0.5, 0.4, 0.7, 0, 6]
+
+    assert _is_in_cls_labels(class_labels, bbox_1)
+    assert not _is_in_cls_labels(class_labels, bbox_2)
+
+
+def test_change_bboxes_cls_ids_validBboxesAsParams_returnsCorrectlyMappedClsIds():
+    cls_mapper = {
+        0: 0,
+        1: 5,
+        3: 1,
+    }
+    valid_bboxes = [
+        [0, 0.5, 0.4, 0.7, 0.6],
+        [1, 0.5, 0.4, 0.7, 0.6],
+        [3, 0.5, 0.4, 0.7, 0.7],
+    ]
+    expected_bboxes = [
+        [0, 0.5, 0.4, 0.7, 0.6],
+        [5, 0.5, 0.4, 0.7, 0.6],
+        [1, 0.5, 0.4, 0.7, 0.7],
+    ]
+    result_bboxes = _change_bboxes_cls_ids(cls_mapper, valid_bboxes)
+    for result, expected in zip(result_bboxes, expected_bboxes):
+        assert result == expected
+
+
+def test_change_bboxes_cls_ids_invalidBboxesAsParams_raiseKeyError():
+    cls_mapper = {
+        0: 0,
+        1: 5,
+        3: 1,
+    }
+    _invalid_bboxes = [
+        [1, 0.5, 0.4, 0.7, 0.32],
+        [1, 0.5, 0.4, 0.7, 0.4],
+        [-1, 0.5, 0.4, 0.7, 0.5],
+    ]
+    with pytest.raises(KeyError):
+        _change_bboxes_cls_ids(cls_mapper, _invalid_bboxes)

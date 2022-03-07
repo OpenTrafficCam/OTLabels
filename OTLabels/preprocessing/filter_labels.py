@@ -17,24 +17,26 @@
 
 # TODO: docstrings in filter_labels
 from typing import Union
+from typing import Tuple
+from typing import List
 
 from pathlib import Path
 from PIL import Image
-import pandas as pd
 import shutil
 import random
 from tqdm import tqdm
 
 from ..helpers.files import get_yolov5_img_path_from_ann_path
 from ..helpers.files import write_yolov5_anns_to_file
+from ..helpers.files import read_cvat_labels_file
 
 
-def _reset_labels(labels):
+def _reset_labels(labels: dict):
     label_dict = {}
-    row = 0
-    for i in labels["Cat"]:
-        label_dict.update({labels.loc[labels["Cat"] == i, "CatId"].values[0]: row})
-        row = row + 1
+
+    for idx, class_id in enumerate(labels.values()):
+        label_dict.update({class_id: idx})
+
     return label_dict
 
 
@@ -81,14 +83,16 @@ def _filter_labels(
     apply_thresh_filter: bool = False,
     reset_label_ids: bool = False,
     discard_img_above_thresh: bool = False,
+    keep_discarded_imgs: bool = False,
 ):
     labels_dir = Path(path, f"labels/{name}")
-    image_dir = Path(path, f"images/{name}")
+    img_dir = Path(path, f"images/{name}")
     dest_dir_labels = Path(path, f"labels/{name}_filtered_{appendix}")
     dest_dir_imgs = Path(path, f"images/{name}_filtered_{appendix}")
     dest_dir_imgs_relative = f"./images/{name}_filtered_{appendix}"
+    dest_dir_discarded_imgs = Path(path, f"images/{name}_filtered_{appendix}_discarded")
 
-    img_type = Path(_file_list(image_dir, "")[0]).suffix.lower()
+    img_type = Path(_file_list(img_dir, "")[0]).suffix.lower()
 
     if not force_filtering and dest_dir_labels.exists() and dest_dir_imgs.exists():
         print(
@@ -98,45 +102,55 @@ def _filter_labels(
         return
 
     # Remove existing filtered data
-    if Path(dest_dir_labels).exists():
+    if dest_dir_labels.exists():
         shutil.rmtree(dest_dir_labels)
-    if Path(dest_dir_imgs).exists():
+    if dest_dir_imgs.exists():
         shutil.rmtree(dest_dir_imgs)
+    if dest_dir_discarded_imgs.exists():
+        shutil.rmtree(dest_dir_discarded_imgs)
 
     Path(dest_dir_labels).mkdir(parents=True)
     Path(dest_dir_imgs).mkdir(parents=True)
+    if keep_discarded_imgs:
+        dest_dir_discarded_imgs.mkdir(parents=True)
 
-    labels = pd.read_csv(labels_filter)
+    class_labels = read_cvat_labels_file(labels_filter, delimiter=",")
     ann_files = _file_list(labels_dir, "txt")
 
     if reset_label_ids:
-        label_dict = _reset_labels(labels)
+        label_dict = _reset_labels(class_labels)
 
     print(
         f"Filter files in {labels_dir} by labels "
-        + ", ".join(str(e) for e in labels["Cat"].tolist())
+        + ", ".join(str(class_name) for class_name in class_labels)
         + "..."
     )
 
-    rel_image_path_list = []
-    image_list_source = []
+    rel_img_paths = []
+    src_img_paths = []
+    discarded_imgs = []
     n = 0
     for ann_file in tqdm(ann_files):
 
         write = random.uniform(0, 1) < sample
 
         file_name = Path(ann_file).name
-        image_name = Path(file_name).stem + img_type
+        img_name = Path(file_name).stem + img_type
+
         if _has_data(ann_file):
-            file_labels = pd.read_csv(ann_file, header=None, sep=" ")
+            bbox_anns = _get_bboxes(ann_file)
 
-        file_labels = file_labels[file_labels[0].isin(labels["CatId"])]
+        bbox_anns_filtered = [
+            bbox for bbox in bbox_anns if _is_in_cls_labels(class_labels, bbox)
+        ]
 
-        if len(file_labels) > 0:
+        if len(bbox_anns_filtered) > 0:
+            dont_write = False
+
             if reset_label_ids:
-                file_labels[0] = file_labels[0].map(label_dict)
-                file_labels = file_labels.dropna()
-                file_labels[0] = file_labels[0].astype(int)
+                bbox_anns_filtered = _change_bboxes_cls_ids(
+                    label_dict, bbox_anns_filtered
+                )
             if write:
                 if apply_thresh_filter:
                     if normalized:
@@ -146,67 +160,139 @@ def _filter_labels(
                         img_path = get_yolov5_img_path_from_ann_path(ann_file, img_type)
                         img_width, img_height = Image.open(img_path).size
 
-                    thresh_filtered_labels = _filter_bboxes_with_bbox_img_ratio(
-                        anns=file_labels,
+                    (
+                        thresh_filtered_labels,
+                        discarded,
+                    ) = _filter_bboxes_with_bbox_img_ratio(
+                        anns=bbox_anns_filtered,
                         img_width=img_width,
                         img_height=img_height,
                         lower_thresh=lower_thresh,
                         upper_thresh=upper_thresh,
                     )
-                    write_yolov5_anns_to_file(
-                        anns=thresh_filtered_labels,
-                        dest=Path(dest_dir_labels, file_name),
+                    assert len(thresh_filtered_labels) + len(discarded) == len(
+                        bbox_anns_filtered
                     )
+
+                    if discard_img_above_thresh:
+                        # set flag to True if img contains bboxes
+                        # greater than upper_thresh
+                        dont_write = True in [
+                            bbox_img_ratio > upper_thresh
+                            for bbox_img_ratio in discarded
+                        ]
+
+                    if not dont_write:
+                        if len(thresh_filtered_labels) == 0:
+                            # use as background image if no bboxes left after filtering
+                            n = n + 1
+
+                        write_yolov5_anns_to_file(
+                            anns=thresh_filtered_labels,
+                            dest=Path(dest_dir_labels, file_name),
+                        )
                 else:
-                    file_labels.to_csv(
-                        Path(dest_dir_labels, file_name),
-                        header=False,
-                        sep=" ",
-                        index=False,
-                        line_terminator="\n",
+                    write_yolov5_anns_to_file(
+                        anns=bbox_anns_filtered, dest=Path(dest_dir_labels, file_name)
                     )
-                rel_image_path_list.append(
-                    "./" + str(Path(dest_dir_imgs_relative, image_name))
-                )
-                image_list_source.append(str(Path(image_dir, image_name)))
+
+                if dont_write:
+                    if keep_discarded_imgs:
+                        discarded_imgs.append(Path(img_dir, img_name))
+                else:
+                    rel_img_paths.append(
+                        "./" + str(Path(dest_dir_imgs_relative, img_name))
+                    )
+                    src_img_paths.append(Path(img_dir, img_name))
         else:
             if n < num_background:
                 open(Path(dest_dir_labels, file_name), "a").close()  # Create empty ann
-                rel_image_path_list.append(
-                    f"./{Path(dest_dir_imgs_relative, image_name)}"
-                )
-                image_list_source.append(str(Path(image_dir, image_name)))
+                rel_img_paths.append(f"./{Path(dest_dir_imgs_relative, img_name)}")
+                src_img_paths.append(Path(img_dir, img_name))
             n = n + 1
-            continue
 
     file_filtered_labels = Path(path, f"{name}_filtered_{appendix}.txt")
     print(f"Writing file with filtered labels to {file_filtered_labels} ...")
 
     with open(file_filtered_labels, "w") as ann_file:
-        ann_file.write("\n".join(rel_image_path_list))
+        ann_file.write("\n".join(rel_img_paths))
 
-    print(f"Copying {len(rel_image_path_list)} images to {dest_dir_imgs} ...")
-    for img in tqdm(image_list_source):
-        shutil.copy(img, dest_dir_imgs)
+    print(f"Copying {len(rel_img_paths)} images to {dest_dir_imgs} ...")
+    for src_img in tqdm(src_img_paths):
+        shutil.copy(src_img, dest_dir_imgs)
+
+    if keep_discarded_imgs:
+        print(
+            f"Copying {len(discarded_imgs)} discarded images to {dest_dir_discarded_imgs}"
+            + "..."
+        )
+        for src_disc_img in tqdm(discarded_imgs):
+            shutil.copy(src_disc_img, dest_dir_discarded_imgs)
 
     print("Done!")
 
 
+def _is_in_cls_labels(class_labels: dict, bbox: list):
+    CLASS_ID = 0
+    for cls_id in class_labels.values():
+        if bbox[CLASS_ID] == cls_id:
+            return True
+
+    return False
+
+
+def _change_bboxes_cls_ids(cls_mapper: dict, bboxes):
+    """
+    Change the bounding boxes class ids.
+
+    Assumes that the bboxes' class ids are specified in `cls_mapper`,ß
+    otherwise raise `KeyError`.
+    """
+    filtered = []
+    for bbox in bboxes:
+        filtered.append(_change_cls_id(bbox, cls_mapper=cls_mapper))
+    return filtered
+
+
+def _change_cls_id(bbox: list, cls_mapper: dict):
+    """
+    Change a bbox's class id if it exists in the cls_mapper, otherwise raise `KeyError`.
+    """
+    cls_id, x, y, w, h = bbox
+    return [cls_mapper[cls_id], x, y, w, h]
+
+
 def _filter_bboxes_with_bbox_img_ratio(
-    anns: pd.DataFrame,
-    img_width,
-    img_height,
+    anns: list,
+    img_width: int,
+    img_height: int,
     lower_thresh: float = 0,
     upper_thresh: float = 1,
-) -> list:
-    """Bounding boxes need to be in xywh format"""
+) -> Tuple[list, List[float]]:
+    """
+    Filters out bounding boxes that are not within the specified threshold.
+
+    Args:
+        anns (list): list of bounding boxes in [class, x, y, w, h] format.
+        img_width (int): set to 1, if working with normalized bboxes.
+        img_height (int): set to 1, if working with normalized bboxes.
+        lower_thresh (float): bboxes with a bbox-img ratio below this thresh will be
+        discarded.
+        upper_thresh (float): bboxes with a bbox_img ratio above this thresh will be
+        discarded.
+
+    Returns:
+        A tuple (keep, discarded) where `keep` denotes a list of bboxes within the
+        threshold, and `discarded` denotes a list bbox-img-ratio of discarded bboxes.
+    """
     # get bboxes
-    if len(anns.index) == 0:
+    if len(anns) == 0:
         return []
 
     filtered_bbox_anns = []
-    for _, bbox in anns.iterrows():
-        _cls, x, y, w, h = bbox.tolist()
+    bbox_img_ratios_of_discarded = []
+    for bbox in anns:
+        _cls, x, y, w, h = bbox
         bbox_to_img_area_ratio = _calc_bbox_to_img_ratio(
             bbox_width=w, bbox_height=h, img_width=img_width, img_height=img_height
         )
@@ -216,7 +302,9 @@ def _filter_bboxes_with_bbox_img_ratio(
             upper_thresh=upper_thresh,
         ):
             filtered_bbox_anns.append([int(_cls), x, y, w, h])
-    return filtered_bbox_anns
+        else:
+            bbox_img_ratios_of_discarded.append(bbox_to_img_area_ratio)
+    return filtered_bbox_anns, bbox_img_ratios_of_discarded
 
 
 def _get_cvat_yolo_ann_path_from_img_path(img_path: Path):
@@ -303,7 +391,17 @@ def _is_bbox_to_img_ratio_in_thresh(
     return lower_thresh <= bbox_to_img_ratio and bbox_to_img_ratio <= upper_thresh
 
 
-def main(path, labels_filter, force_filtering=False):
+def main(
+    path: Union[str, Path],
+    labels_filter: Union[str, Path],
+    normalized: bool,
+    lower_thresh: float,
+    upper_thresh: float,
+    apply_thresh_filter: bool,
+    discard_img_above_thresh: bool,
+    keep_discarded_imgs: bool = False,
+    force_filtering: bool = False,
+):
     # TODO: #14 read name, sample and background from config file
     name = ["train2017", "val2017"]
     sample = [1, 1]
@@ -318,8 +416,14 @@ def main(path, labels_filter, force_filtering=False):
                 appendix=appendix,
                 num_background=b,
                 sample=s,
-                reset_label_ids=True,
                 force_filtering=force_filtering,
+                normalized=normalized,
+                lower_thresh=lower_thresh,
+                upper_thresh=upper_thresh,
+                apply_thresh_filter=apply_thresh_filter,
+                reset_label_ids=True,
+                discard_img_above_thresh=discard_img_above_thresh,
+                keep_discarded_imgs=keep_discarded_imgs,
             )
     else:
         appendix = str(sample)

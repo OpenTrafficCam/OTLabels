@@ -38,6 +38,12 @@ def main(config_path):
         filter_labels.main(
             path=config["coco_dir"],
             labels_filter=config["labels_cvat"],
+            normalized=config["coco_normalized"],
+            lower_thresh=config["lower_thresh"],
+            upper_thresh=config["upper_thresh"],
+            apply_thresh_filter=config["apply_thresh_filter"],
+            discard_img_above_thresh=config["discard_img_above_thresh"],
+            keep_discarded_imgs=config["keep_discarded_imgs"],
             force_filtering=config["force_filtering_labels"],
         )
 
