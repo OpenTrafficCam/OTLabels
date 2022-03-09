@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 from PIL import Image
 
-from OTLabels.preprocessing.filter_labels import _is_bbox_to_img_ratio_in_thresh
+# from OTLabels.preprocessing.filter_labels import _is_bbox_to_img_ratio_in_thresh
 from OTLabels.preprocessing.filter_labels import _get_bboxes
 from OTLabels.preprocessing.filter_labels import _get_cvat_yolo_ann_path_from_img_path
 from OTLabels.preprocessing.filter_labels import _filter_bboxes_with_bbox_img_ratio
@@ -27,6 +27,11 @@ def neg_img_size():
 @pytest.fixture
 def test_dataset_dir(test_resources_dir):
     return Path(test_resources_dir, "example_dataset")
+
+
+@pytest.fixture
+def example_bboxes():
+    return [[1, 0.01, 0.01, 0.5, 0.5]]
 
 
 @pytest.fixture
@@ -67,7 +72,7 @@ def example_yolov5_dir(test_resources_dir, img_path_list: list[Path]):
     labels_dir.mkdir(exist_ok=True, parents=True)
 
     anns = [
-        ["0 75 75 300 400", "4 12 17 10 10"],
+        ["0 75 75 300 400", "4 12 17 10 10", "1 2 3 600 400"],
         ["5 1 1 10 10", "21 4 4 1 1"],
     ]
     # Copy images to temp folder
@@ -87,40 +92,47 @@ def example_yolov5_dir(test_resources_dir, img_path_list: list[Path]):
     shutil.rmtree(test_example_dir)
 
 
-@pytest.mark.parametrize(
-    "bbox_to_img_ratio,thresh", [(0.29, [0.3, 1]), (0.55, [0.3, 0.5])]
-)
-def test_is_bbox_to_img_ratio_in_thresh_ratioOutsideThresh_returnsFalse(
-    bbox_to_img_ratio, thresh
+def test_filter_bboxes_with_bbox_img_ratio_upperThreshLtLowerThresh_raiseValueError(
+    example_bboxes,
 ):
-    lower_thresh, upper_thresh = thresh
 
-    assert not _is_bbox_to_img_ratio_in_thresh(
-        bbox_to_img_ratio=bbox_to_img_ratio,
-        lower_thresh=lower_thresh,
-        upper_thresh=upper_thresh,
-    )
+    with pytest.raises(ValueError) as ve:
+        _filter_bboxes_with_bbox_img_ratio(
+            anns=example_bboxes,
+            img_width=1,
+            img_height=1,
+            lower_thresh=0.5,
+            upper_thresh=0.1,
+        )
+    assert "Upper threshhold must be greater equal than lower" in str(ve.value)
 
 
-@pytest.mark.parametrize(
-    "bbox_to_img_ratio,thresh",
-    [
-        (0, [0, 1]),
-        (1, [0, 1]),
-        (0.15, [0.15, 0.5]),
-        (0.5, [0.15, 0.5]),
-        (0.25, [0.15, 0.5]),
-    ],
-)
-def test_is_bbox_to_img_ratio_in_thresh_ratioInsideThresh_returnsTrue(
-    bbox_to_img_ratio, thresh
+def test_filter_bboxes_with_bbox_img_ratio_invalidLowerThresh_raiseValueError(
+    example_bboxes,
 ):
-    lower_thresh, upper_thresh = thresh
-    assert _is_bbox_to_img_ratio_in_thresh(
-        bbox_to_img_ratio=bbox_to_img_ratio,
-        lower_thresh=lower_thresh,
-        upper_thresh=upper_thresh,
-    )
+    with pytest.raises(ValueError) as ve:
+        _filter_bboxes_with_bbox_img_ratio(
+            anns=example_bboxes,
+            img_width=1,
+            img_height=1,
+            lower_thresh=-0.5,
+            upper_thresh=0.1,
+        )
+    assert "Lower threshold is not within the range of [0, 1]." in str(ve.value)
+
+
+def test_filter_bboxes_with_bbox_img_ratio_invalidUpperThresh_raiseValueError(
+    example_bboxes,
+):
+    with pytest.raises(ValueError) as ve:
+        _filter_bboxes_with_bbox_img_ratio(
+            anns=example_bboxes,
+            img_width=1,
+            img_height=1,
+            lower_thresh=0,
+            upper_thresh=5,
+        )
+    assert "Upper threshold is not within the range of [0, 1]." in str(ve.value)
 
 
 def test_calc_bbox_to_img_ratio_negImgSizeValues_RaiseValueError():
@@ -223,11 +235,16 @@ def test_filter_bboxes_with_bbox_img_ratio_noThreshApplied_normalized_returnsSam
         [1, 0.4, 0.4, 0.01, 0.01],
         [1, 0.4, 0.4, 1, 1],
     ]
-    filtered_dets, discarded = _filter_bboxes_with_bbox_img_ratio(
+    (
+        filtered_dets,
+        bbox_lt_thresh_exists,
+        bbox_gt_thresh_exists,
+    ) = _filter_bboxes_with_bbox_img_ratio(
         anns=bboxes, img_height=1, img_width=1, lower_thresh=0, upper_thresh=1
     )
     assert len(filtered_dets) == len(bboxes)
-    assert len(discarded) == 0
+    assert not bbox_lt_thresh_exists
+    assert not bbox_gt_thresh_exists
 
 
 def test_filter_bboxes_with_bbox_img_ratio_threshDiscardAll_normalized_returnsNoDets():
@@ -236,7 +253,11 @@ def test_filter_bboxes_with_bbox_img_ratio_threshDiscardAll_normalized_returnsNo
         [1, 0.4, 0.4, 0.01, 0.01],
         [1, 0.4, 0.4, 1, 1],
     ]
-    kept_bboxes, discarded = _filter_bboxes_with_bbox_img_ratio(
+    (
+        kept_bboxes,
+        bbox_lt_thresh_exists,
+        bbox_gt_thresh_exists,
+    ) = _filter_bboxes_with_bbox_img_ratio(
         anns=bboxes,
         img_width=1,
         img_height=1,
@@ -244,12 +265,17 @@ def test_filter_bboxes_with_bbox_img_ratio_threshDiscardAll_normalized_returnsNo
         upper_thresh=0,
     )
     assert len(kept_bboxes) == 0
-    assert len(discarded) == 3
+    assert not bbox_lt_thresh_exists
+    assert bbox_gt_thresh_exists
 
 
 def test_filter_bboxes_with_bbox_img_ratio_normalizedFalseAsParam_returnDets(
     example_yolov5_dir,
 ):
+    BBOXES = 0
+    BBOX_LT_THRESH_EXISTS = 1
+    BBOX_GT_THRESH_EXISTS = 2
+
     img_paths = [
         img_path
         for img_path in Path(example_yolov5_dir, "images").iterdir()
@@ -262,30 +288,32 @@ def test_filter_bboxes_with_bbox_img_ratio_normalizedFalseAsParam_returnDets(
     ]
 
     filtered_bboxes = []
-    discarded_bboxes = []
     for img_path, ann in zip(img_paths, anns):
         img_width, img_height = Image.open(img_path).size
 
         (
             filtered_bbox_of_img,
-            bbox_img_ratio_of_discarded_bboxes,
+            bbox_lt_thresh_exists,
+            bbox_gt_thresh_exists,
         ) = _filter_bboxes_with_bbox_img_ratio(
             anns=ann,
             img_width=img_width,
             img_height=img_height,
             lower_thresh=0.1,
-            upper_thresh=1,
+            upper_thresh=0.6,
         )
-        filtered_bboxes.append(filtered_bbox_of_img)
-        discarded_bboxes.append(bbox_img_ratio_of_discarded_bboxes)
-        assert len(filtered_bbox_of_img) + len(
-            bbox_img_ratio_of_discarded_bboxes
-        ) == len(ann)
+        filtered_bboxes.append(
+            (filtered_bbox_of_img, bbox_lt_thresh_exists, bbox_gt_thresh_exists)
+        )
 
-    assert len(filtered_bboxes[0]) == 1
-    assert len(discarded_bboxes[0]) == 1
-    assert len(filtered_bboxes[1]) == 0
-    assert len(discarded_bboxes[1]) == 2
+    assert len(filtered_bboxes[0][BBOXES]) == 1
+    assert len(filtered_bboxes[1][BBOXES]) == 0
+
+    assert filtered_bboxes[0][BBOX_LT_THRESH_EXISTS] is True
+    assert filtered_bboxes[0][BBOX_GT_THRESH_EXISTS] is True
+
+    assert filtered_bboxes[1][BBOX_LT_THRESH_EXISTS] is True
+    assert filtered_bboxes[1][BBOX_GT_THRESH_EXISTS] is False
 
 
 def test_is_in_cls_labels():

@@ -83,6 +83,7 @@ def _filter_labels(
     apply_thresh_filter: bool = False,
     reset_label_ids: bool = False,
     discard_img_above_thresh: bool = False,
+    discard_img_below_thresh: bool = False,
     keep_discarded_imgs: bool = False,
 ):
     labels_dir = Path(path, f"labels/{name}")
@@ -161,8 +162,9 @@ def _filter_labels(
                         img_width, img_height = Image.open(img_path).size
 
                     (
-                        thresh_filtered_labels,
-                        discarded,
+                        remaining_bboxes,
+                        bbox_lt_thresh_exists,
+                        bbox_gt_thresh_exists,
                     ) = _filter_bboxes_with_bbox_img_ratio(
                         anns=bbox_anns_filtered,
                         img_width=img_width,
@@ -170,25 +172,26 @@ def _filter_labels(
                         lower_thresh=lower_thresh,
                         upper_thresh=upper_thresh,
                     )
-                    assert len(thresh_filtered_labels) + len(discarded) == len(
-                        bbox_anns_filtered
-                    )
 
                     if discard_img_above_thresh:
                         # set flag to True if img contains bboxes
                         # greater than upper_thresh
-                        dont_write = True in [
-                            bbox_img_ratio > upper_thresh
-                            for bbox_img_ratio in discarded
-                        ]
+                        if not dont_write:
+                            dont_write = bbox_gt_thresh_exists
+
+                    if discard_img_below_thresh:
+                        # set flag to True if img contains bboxes
+                        # less than lower_thresh
+                        if not dont_write:
+                            dont_write = bbox_lt_thresh_exists
 
                     if not dont_write:
-                        if len(thresh_filtered_labels) == 0:
+                        if len(remaining_bboxes) == 0:
                             # use as background image if no bboxes left after filtering
                             n = n + 1
 
                         write_yolov5_anns_to_file(
-                            anns=thresh_filtered_labels,
+                            anns=remaining_bboxes,
                             dest=Path(dest_dir_labels, file_name),
                         )
                 else:
@@ -282,29 +285,53 @@ def _filter_bboxes_with_bbox_img_ratio(
         discarded.
 
     Returns:
-        A tuple (keep, discarded) where `keep` denotes a list of bboxes within the
-        threshold, and `discarded` denotes a list bbox-img-ratio of discarded bboxes.
+        A tuple `(keep, bbox_lt_thresh_exists, bbox_gt_thresh_exists)` where:
+        `keep`: contains a list of bboxes within the threshold
+        `bbox_lt_thresh_exists`: denotes whether a bbox is below `lower_thresh`
+        `bbox_gt_thresh_exists`: denotes whether a bbox is above `upper_thresh`
+
+    Raises:
+        ValueError: is raised when `lower_thresh` and `upper_thresh`
+        are not in range [0,1] or when `upper_thresh < lower_thresh`.
     """
+    if upper_thresh < lower_thresh:
+        raise ValueError(
+            "Upper threshhold must be greater equal than lower threshold. "
+            + f"Actual values: lower_thresh={lower_thresh}, upper_thresh={upper_thresh}"
+        )
+    if lower_thresh < 0 or lower_thresh > 1:
+        raise ValueError(
+            "Lower threshold is not within the range of [0, 1]. "
+            + f"Actual value: {lower_thresh}"
+        )
+    if upper_thresh < 0 or upper_thresh > 1:
+        raise ValueError(
+            "Upper threshold is not within the range of [0, 1]. "
+            + f"Actual value: {upper_thresh}"
+        )
+
+    bbox_gt_thresh_exists = False
+    bbox_lt_thresh_exists = False
+
     # get bboxes
     if len(anns) == 0:
         return []
 
     filtered_bbox_anns = []
-    bbox_img_ratios_of_discarded = []
     for bbox in anns:
         _cls, x, y, w, h = bbox
-        bbox_to_img_area_ratio = _calc_bbox_to_img_ratio(
+        bbox_img_ratio = _calc_bbox_to_img_ratio(
             bbox_width=w, bbox_height=h, img_width=img_width, img_height=img_height
         )
-        if _is_bbox_to_img_ratio_in_thresh(
-            bbox_to_img_ratio=bbox_to_img_area_ratio,
-            lower_thresh=lower_thresh,
-            upper_thresh=upper_thresh,
-        ):
+        if bbox_img_ratio >= lower_thresh and bbox_img_ratio <= upper_thresh:
             filtered_bbox_anns.append([int(_cls), x, y, w, h])
         else:
-            bbox_img_ratios_of_discarded.append(bbox_to_img_area_ratio)
-    return filtered_bbox_anns, bbox_img_ratios_of_discarded
+            if not bbox_lt_thresh_exists and bbox_img_ratio < lower_thresh:
+                bbox_lt_thresh_exists = True
+            if not bbox_gt_thresh_exists and bbox_img_ratio > upper_thresh:
+                bbox_gt_thresh_exists = True
+
+    return filtered_bbox_anns, bbox_lt_thresh_exists, bbox_gt_thresh_exists
 
 
 def _get_cvat_yolo_ann_path_from_img_path(img_path: Path):
@@ -372,25 +399,6 @@ def _calc_bbox_to_img_ratio(
     return bbox_to_img_ratio
 
 
-def _is_bbox_to_img_ratio_in_thresh(
-    bbox_to_img_ratio: float,
-    lower_thresh: float,
-    upper_thresh: float,
-):
-    assert (
-        lower_thresh <= upper_thresh
-        and lower_thresh >= 0
-        and lower_thresh <= 1
-        and upper_thresh >= 0
-        and upper_thresh <= 1
-    ), (
-        "Condition that 0 <= 'lower_thresh <= upper_thresh' <= 1 not fulfilled.\n"
-        + f"Actual value: lower_thresh = {lower_thresh}, upper_thresh = {upper_thresh}"
-    )
-
-    return lower_thresh <= bbox_to_img_ratio and bbox_to_img_ratio <= upper_thresh
-
-
 def main(
     path: Union[str, Path],
     labels_filter: Union[str, Path],
@@ -399,6 +407,7 @@ def main(
     upper_thresh: float,
     apply_thresh_filter: bool,
     discard_img_above_thresh: bool,
+    discard_img_below_thresh: bool,
     keep_discarded_imgs: bool = False,
     force_filtering: bool = False,
 ):
@@ -423,6 +432,7 @@ def main(
                 apply_thresh_filter=apply_thresh_filter,
                 reset_label_ids=True,
                 discard_img_above_thresh=discard_img_above_thresh,
+                discard_img_below_thresh=discard_img_below_thresh,
                 keep_discarded_imgs=keep_discarded_imgs,
             )
     else:

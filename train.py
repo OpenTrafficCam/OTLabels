@@ -43,6 +43,7 @@ def main(config_path):
             upper_thresh=config["upper_thresh"],
             apply_thresh_filter=config["apply_thresh_filter"],
             discard_img_above_thresh=config["discard_img_above_thresh"],
+            discard_img_below_thresh=config["discard_img_below_thresh"],
             keep_discarded_imgs=config["keep_discarded_imgs"],
             force_filtering=config["force_filtering_labels"],
         )
@@ -55,7 +56,7 @@ def main(config_path):
             coco_ann_file_path=config["coco_json_file"],
             new_dataset_name=config["custom_dataset_name"],
         )
-
+    return
     try:
         # Use last.pt as model weight and create another training session
         last_pt, next_model_name = _get_last_pt_and_next_model_name(config)
