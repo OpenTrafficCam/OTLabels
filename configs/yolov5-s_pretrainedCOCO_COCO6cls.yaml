@@ -10,11 +10,13 @@ resume_training: true # Resume from most recent training or when model_weights s
 
 # To train model from scratch set `model_weights: ""` and `model_cfg: path/to/model_cfg.yaml`.
 # model_weights can also be a path to custom weights.
-model_weights: yolov5s.pt 
+model_weights: yolov5s.pt
 model_name: yolov5-s_pretrainedCOCO_COCO6cls
 model_cfg: OTLabels/models/yolov5s_6cl.yaml
 model_hyp: OTLabels/data/hyp.finetune.yaml
 project_name: OTLabels/data/runs/yolov5-s_pretrainedCOCO_COCO6cls
+# project_name: the last dir in path is used as project_name
+# whereas the path denotes location where wandb data is saved locally
 
 # Data Configuration
 
@@ -23,10 +25,19 @@ force_download_coco: false
 force_filtering_labels: false
 use_custom_datasets: false
 filter_classes: true
+coco_normalized: true
 
 data_dir: OTLabels/data
 data_config: OTLabels/data/coco_6cl.yaml
 labels_cvat: OTLabels/labels_CVAT.txt
+
+# Filter out bboxes that are not within a defined threshold
+apply_thresh_filter: false
+discard_img_above_thresh: false
+discard_img_below_thresh: false
+keep_discarded_imgs: false
+lower_thresh: 0
+upper_thresh: 1
 
 # COCO Paths
 coco_img_urls: OTLabels/coco_image_URLs.txt
@@ -38,3 +49,4 @@ coco_json_file: OTLabels/data/coco/annotations/instances_val2017.json
 custom_dir: OTLabels/data/custom
 custom_dataset_name: otc_custom
 custom_datasets: OTLabels/data/custom
+custom_dataset_normalized: true
