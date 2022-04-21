@@ -27,4 +27,4 @@ jobs:
           pip install pytest-cov
           pip install pytest
       - name: Test with pytest
-        run: pytest --cov=OTVision tests/
+        run: pytest --cov=OTLabels tests/
