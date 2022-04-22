@@ -13,7 +13,7 @@ resume_training: true # Resume from most recent training or when model_weights s
 model_weights: ""
 model_name: yolov5-s_COCO
 model_cfg: yolov5/models/yolov5s.yaml
-model_hyp: OTLabels/data/hyp.finetune.yaml
+model_hyp: yolov5/data/hyps/hyp.scratch-low.yaml
 project_name: OTLabels/data/runs/yolov5-s_COCO
 
 # Data Configuration
