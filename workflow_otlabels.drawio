@@ -1,0 +1,257 @@
+<mxfile host="65bd71144e">
+    <diagram id="Oa50-CBtwlzPaPEysfNg" name="OTLabels">
+        <mxGraphModel dx="1664" dy="821" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="47" style="edgeStyle=none;sketch=1;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0;entryDx=0;entryDy=27.5;entryPerimeter=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;" edge="1" parent="1" source="21" target="31">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="258" y="300"/>
+                            <mxPoint x="258" y="408"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="54" style="edgeStyle=none;sketch=1;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=22;" edge="1" parent="1" source="21" target="43">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="108" style="edgeStyle=none;sketch=1;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;dashed=1;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;fontColor=#F0F0F0;startArrow=none;startFill=0;" edge="1" parent="1" source="21" target="29">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="127" y="230"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="21" value="image data" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;sketch=1;spacingLeft=2;spacingRight=2;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;" vertex="1" parent="1">
+                    <mxGeometry x="96.5" y="260" width="60" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="46" style="edgeStyle=none;sketch=1;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;" edge="1" parent="1" target="43">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="127.5" y="410" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="48" style="edgeStyle=none;sketch=1;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0;entryDx=0;entryDy=52.5;entryPerimeter=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;" edge="1" parent="1" source="27" target="31">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="258" y="540"/>
+                            <mxPoint x="258" y="433"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="27" value="label files" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;sketch=1;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;strokeColor=#F0F0F0;" vertex="1" parent="1">
+                    <mxGeometry x="96.5" y="500" width="60" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="109" style="edgeStyle=none;sketch=1;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.145;entryY=0;entryDx=0;entryDy=4.35;entryPerimeter=0;dashed=1;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;fontColor=#F0F0F0;startArrow=none;startFill=0;" edge="1" parent="1" source="29" target="31">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="334" y="230"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="29" value="&lt;span&gt;add time of day and weather&lt;br&gt;&lt;/span&gt;" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;sketch=1;dashed=1;spacingLeft=3;spacingRight=3;spacing=3;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;" vertex="1" parent="1">
+                    <mxGeometry x="156.5" y="200" width="150" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="52" style="edgeStyle=none;sketch=1;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;" edge="1" parent="1" source="31" target="36">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="73" style="edgeStyle=none;sketch=1;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;" edge="1" parent="1" source="31" target="72">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="98" style="edgeStyle=none;sketch=1;html=1;exitX=0.855;exitY=1;exitDx=0;exitDy=-4.35;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;startArrow=none;startFill=0;" edge="1" parent="1" source="31" target="97">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="466" y="540"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="31" value="fiftyone" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;sketch=1;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fillColor=#60a917;fontColor=#ffffff;strokeColor=default;" vertex="1" parent="1">
+                    <mxGeometry x="307.5" y="380" width="185" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="50" style="edgeStyle=none;sketch=1;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;" edge="1" parent="1" source="36" target="39">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="36" value="CVAT" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;sketch=1;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fillColor=#1ba1e2;fontColor=#ffffff;strokeColor=#F0F0F0;" vertex="1" parent="1">
+                    <mxGeometry x="370" y="500" width="60" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="51" style="edgeStyle=none;sketch=1;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;" edge="1" parent="1" source="39" target="27">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="127" y="650"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="39" value="&lt;span&gt;annotation&lt;br&gt;&lt;/span&gt;" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;sketch=1;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;" vertex="1" parent="1">
+                    <mxGeometry x="340" y="620" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="45" style="edgeStyle=none;sketch=1;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="43" target="27">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="127.5" y="560" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="43" value="&lt;span&gt;pre-annotation&lt;br&gt;&lt;/span&gt;" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;sketch=1;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;" vertex="1" parent="1">
+                    <mxGeometry x="64" y="390" width="125" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="53" value="&amp;nbsp;OTLabels Workflow" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=30;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;" vertex="1" parent="1">
+                    <mxGeometry x="30" y="50" width="290" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="58" style="edgeStyle=none;sketch=1;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;" edge="1" parent="1" source="57" target="43">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="390" y="160"/>
+                            <mxPoint x="40" y="160"/>
+                            <mxPoint x="40" y="420"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="57" value="YOLOv8&lt;br&gt;standard weights" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;sketch=1;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;strokeColor=#F0F0F0;fillColor=#a20025;fontColor=#ffffff;" vertex="1" parent="1">
+                    <mxGeometry x="360" y="230" width="60" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="91" style="edgeStyle=none;sketch=1;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=52.5;entryPerimeter=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;startArrow=none;startFill=0;" edge="1" parent="1" source="59" target="63">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="960" y="420"/>
+                            <mxPoint x="960" y="260"/>
+                            <mxPoint x="680" y="260"/>
+                            <mxPoint x="680" y="282"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="59" value="&lt;span&gt;training&lt;br&gt;&lt;/span&gt;" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;sketch=1;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;" vertex="1" parent="1">
+                    <mxGeometry x="820" y="390" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="89" style="sketch=1;html=1;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;startArrow=none;startFill=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0.145;exitY=0;exitDx=0;exitDy=4.35;exitPerimeter=0;" edge="1" parent="1" source="63" target="43">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="340" y="240" as="targetPoint"/>
+                        <mxPoint x="610" y="180" as="sourcePoint"/>
+                        <Array as="points">
+                            <mxPoint x="590" y="160"/>
+                            <mxPoint x="40" y="160"/>
+                            <mxPoint x="40" y="420"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="90" style="edgeStyle=none;sketch=1;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;startArrow=none;startFill=0;" edge="1" parent="1" source="63" target="66">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="95" style="edgeStyle=none;sketch=1;html=1;exitX=1;exitY=0;exitDx=0;exitDy=27.5;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;startArrow=none;startFill=0;" edge="1" parent="1" source="63" target="68">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="660" y="257"/>
+                            <mxPoint x="660" y="240"/>
+                            <mxPoint x="980" y="240"/>
+                            <mxPoint x="980" y="650"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="102" style="edgeStyle=none;sketch=1;html=1;exitX=0.855;exitY=0;exitDx=0;exitDy=4.35;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;fontColor=#F0F0F0;startArrow=none;startFill=0;" edge="1" parent="1" source="63" target="100">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="631" y="220"/>
+                            <mxPoint x="1000" y="220"/>
+                            <mxPoint x="1000" y="375"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="103" style="edgeStyle=none;sketch=1;html=1;exitX=0.855;exitY=0;exitDx=0;exitDy=4.35;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;fontColor=#F0F0F0;startArrow=none;startFill=0;dashed=1;" edge="1" parent="1" source="63" target="101">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="631" y="220"/>
+                            <mxPoint x="1000" y="220"/>
+                            <mxPoint x="1000" y="465"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="63" value="YOLOv8&lt;br&gt;trained weights" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;sketch=1;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;strokeColor=#F0F0F0;fillColor=#a20025;fontColor=#ffffff;" vertex="1" parent="1">
+                    <mxGeometry x="580" y="230" width="60" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="67" value="" style="edgeStyle=none;sketch=1;html=1;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;" edge="1" parent="1" source="66" target="57">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="66" value="YOLOv8" style="rounded=0;whiteSpace=wrap;html=1;sketch=1;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;strokeColor=#F0F0F0;fillColor=#a20025;fontColor=#ffffff;" vertex="1" parent="1">
+                    <mxGeometry x="450" y="240" width="100" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="85" style="edgeStyle=none;sketch=1;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;" edge="1" parent="1" source="68" target="27">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="730" y="700"/>
+                            <mxPoint x="70" y="700"/>
+                            <mxPoint x="70" y="540"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="68" value="&lt;span&gt;detect&amp;nbsp;&lt;br&gt;&lt;/span&gt;" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;sketch=1;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;" vertex="1" parent="1">
+                    <mxGeometry x="670" y="620" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="79" style="edgeStyle=none;sketch=1;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;" edge="1" parent="1" source="72" target="75">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="80" style="edgeStyle=none;sketch=1;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;" edge="1" parent="1" source="72" target="76">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="670" y="433"/>
+                            <mxPoint x="670" y="521"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="81" style="edgeStyle=none;sketch=1;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;" edge="1" parent="1" source="72" target="74">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="670" y="407"/>
+                            <mxPoint x="670" y="315"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="72" value="&lt;span&gt;select images&lt;br&gt;&lt;/span&gt;" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;sketch=1;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;" vertex="1" parent="1">
+                    <mxGeometry x="540" y="390" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="77" style="edgeStyle=none;sketch=1;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;" edge="1" parent="1" source="74" target="59">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="880" y="315"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="74" value="training data" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;sketch=1;spacingLeft=2;spacingRight=2;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;" vertex="1" parent="1">
+                    <mxGeometry x="700" y="280" width="60" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="78" style="edgeStyle=none;sketch=1;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;" edge="1" parent="1" source="75" target="59">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="75" value="test data" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;sketch=1;spacingLeft=2;spacingRight=2;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;" vertex="1" parent="1">
+                    <mxGeometry x="700" y="385" width="60" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="84" style="edgeStyle=none;sketch=1;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;" edge="1" parent="1" source="76" target="68">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="76" value="validation data" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;sketch=1;spacingLeft=2;spacingRight=2;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;" vertex="1" parent="1">
+                    <mxGeometry x="700" y="486" width="60" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="107" style="edgeStyle=none;sketch=1;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;fontColor=#F0F0F0;startArrow=none;startFill=0;dashed=1;" edge="1" parent="1" source="97" target="101">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="570" y="590"/>
+                            <mxPoint x="1080" y="590"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="110" style="edgeStyle=none;sketch=1;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;fontColor=#F0F0F0;startArrow=none;startFill=0;" edge="1" parent="1" source="97" target="72">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="570" y="486"/>
+                            <mxPoint x="600" y="486"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="97" value="&lt;span&gt;validate models&lt;br&gt;&lt;/span&gt;" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;sketch=1;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;" vertex="1" parent="1">
+                    <mxGeometry x="510" y="510" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="100" value="&lt;font color=&quot;#f0f0f0&quot;&gt;OTVision&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;sketch=1;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;strokeColor=#F0F0F0;fillColor=#e3c800;fontColor=#000000;" vertex="1" parent="1">
+                    <mxGeometry x="1030" y="345" width="100" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="101" value="&lt;font color=&quot;#f0f0f0&quot;&gt;OTValidate&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;sketch=1;fontFamily=open sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3Dopen%2Bsans;fontSize=12;strokeColor=#F0F0F0;fillColor=#6a00ff;fontColor=#ffffff;" vertex="1" parent="1">
+                    <mxGeometry x="1030" y="435" width="100" height="60" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
