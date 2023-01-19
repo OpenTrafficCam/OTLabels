@@ -10,8 +10,9 @@
         "height": "5m",
         "occasion": "Tempo30",
         "comments": "TEST",
-        "image_path": "/Users/michaelheilig/GIT/OTC/OTLabels/data/image_data/Aachen_OTCamera12",
-        "label_path": "/Users/michaelheilig/GIT/OTC/OTLabels/data/image_data/Aachen_OTCamera12"
+        "classes": {},
+        "image_path": "data/image_data/Aachen_OTCamera12/images",
+        "label_path": "data/image_data/Aachen_OTCamera12"
     },
     "Aachen_OTCamera13": {
         "site": "Aachen",
@@ -24,7 +25,7 @@
         "height": "5m",
         "occasion": "Tempo30",
         "comments": "TEST",
-        "image_path": "/Users/michaelheilig/GIT/OTC/OTLabels/data/image_data/Aachen_OTCamera13",
-        "label_path": "/Users/michaelheilig/GIT/OTC/OTLabels/data/image_data/Aachen_OTCamera13"
+        "image_path": "data/image_data/Aachen_OTCamera13/images",
+        "label_path": "data/image_data/Aachen_OTCamera13"
     }
 }
