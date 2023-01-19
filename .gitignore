@@ -169,3 +169,6 @@ runs
 # Model data
 *.pt
 *.jpg
+
+# VS Code
+.vscode
