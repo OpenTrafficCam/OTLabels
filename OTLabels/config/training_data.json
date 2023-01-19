@@ -1,0 +1,30 @@
+{
+    "Aachen_OTCamera12": {
+        "site": "Aachen",
+        "cam_type": "OpenTrafficCam",
+        "lense_type": "normal",
+        "geolocation": {
+            "lat": "6.086508440107006",
+            "lon": "50.77834966734618"
+        },
+        "height": "5m",
+        "occasion": "Tempo30",
+        "comments": "TEST",
+        "image_path": "/Users/michaelheilig/GIT/OTC/OTLabels/data/image_data/Aachen_OTCamera12",
+        "label_path": "/Users/michaelheilig/GIT/OTC/OTLabels/data/image_data/Aachen_OTCamera12"
+    },
+    "Aachen_OTCamera13": {
+        "site": "Aachen",
+        "cam_type": "OpenTrafficCam",
+        "lense_type": "normal",
+        "geolocation": {
+            "lat": "6.086508440107006",
+            "lon": "50.77834966734618"
+        },
+        "height": "5m",
+        "occasion": "Tempo30",
+        "comments": "TEST",
+        "image_path": "/Users/michaelheilig/GIT/OTC/OTLabels/data/image_data/Aachen_OTCamera13",
+        "label_path": "/Users/michaelheilig/GIT/OTC/OTLabels/data/image_data/Aachen_OTCamera13"
+    }
+}
