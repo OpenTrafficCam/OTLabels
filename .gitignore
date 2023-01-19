@@ -166,5 +166,6 @@ cython_debug/
 data
 runs
 
-# Model weights
+# Model data
 *.pt
+*.jpg
