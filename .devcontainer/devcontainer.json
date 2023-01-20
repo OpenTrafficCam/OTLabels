@@ -1,7 +1,14 @@
 {
 	"name": "OTLabels",
-	"context": "..",
-	"dockerFile": "../Dockerfile",
+	"image": "mcr.microsoft.com/devcontainers/python:3.10-bullseye",
+	"features": {
+		"ghcr.io/rocker-org/devcontainer-features/apt-packages:1": {
+			"packages": "libgl1,gdal-bin,libgdal-dev"
+		}
+	},
+	"containerEnv": {
+		"PYTHONPATH": "/workspaces/OTLabels"
+	},
 	"onCreateCommand": "bash .devcontainer/scripts/on_create.sh",
 	"customizations": {
 		"vscode": {
