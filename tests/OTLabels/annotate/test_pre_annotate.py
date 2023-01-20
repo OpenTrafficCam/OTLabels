@@ -5,12 +5,11 @@ from OTLabels.annotate.pre_annotate import PreAnnotateImages
 
 class TestYOLOv8:
     def test_init_config_path(self) -> None:
-        erwartetes_ergebnis = (
-            "/Users/michaelheilig/GIT/OTC/OTLabels/data/image_data/Aachen_OTCamera12"
-        )
+        erwartetes_ergebnis = "data/image_data/Aachen_OTCamera12/images"
         rechner = PreAnnotateImages(
             config_file="OTLabels/config/training_data.json",
             label_file="OTLabels/config/labels_COCO.json",
+            filter_sites=["Aachen_OTCamera12"],
         )
         ergebnis: PreAnnotateImages = rechner.config["Aachen_OTCamera12"]["image_path"]
         assert erwartetes_ergebnis == ergebnis
