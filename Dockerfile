@@ -7,10 +7,10 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /platomo/otlabels
 COPY requirements.txt requirements.txt
-COPY requirements_m1.txt requirements_m1.txt
-COPY requirements_dev.txt requirements_dev.txt
+COPY requirements-m1.txt requirements-m1.txt
+COPY requirements-dev.txt requirements-dev.txt
 ENV PYTHONPATH /platomo/otlabels
-RUN pip install --no-cache-dir --upgrade pip==22.3 && pip install --no-cache-dir -r requirements_dev.txt && pip install --no-cache-dir -r requirements_m1.txt
+RUN pip install --no-cache-dir --upgrade pip==22.3 && pip install --no-cache-dir -r requirements-dev.txt && pip install --no-cache-dir -r requirements-m1.txt
 COPY . .
 RUN pip install --no-cache-dir -e .
 CMD ["python", "main.py"]
