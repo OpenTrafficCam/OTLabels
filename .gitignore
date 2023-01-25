@@ -172,3 +172,6 @@ runs
 
 # VS Code
 .vscode
+
+# Security credentials
+security.json
