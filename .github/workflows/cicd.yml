@@ -55,5 +55,5 @@ jobs:
           context: .
           file: Dockerfile.cuda
           push: true
-          tags: ghcr.io/opentrafficcam/OTLabels
+          tags: ghcr.io/opentrafficcam/otlabels
           labels: ${{ steps.meta.outputs.labels }}
