@@ -1,0 +1,12 @@
+FROM nvcr.io/nvidia/cuda:11.4.0-runtime-ubuntu20.04
+COPY requirements-training.txt requirements-training.txt
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    rm -rf /var/lib/apt/lists/*
+RUN add-apt-repository ppa:deadsnakes/ppa
+RUN apt-get update && \
+    apt-get install -y python3.10 python3-pip libx11-dev && \
+    rm -rf /var/lib/apt/lists/*
+RUN pip install --upgrade pip
+RUN pip install -r requirements-training.txt
+ENTRYPOINT [ "python3", "OTLabels/train_models.py" ]
