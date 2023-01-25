@@ -27,11 +27,11 @@ class CVAT:
             with open(class_file) as json_file:
                 self.classes = json.load(json_file)
 
-    def export_data(self) -> None:
+    def export_data(self, anno_key: str) -> None:
         dataset = fo.load_dataset("OTLabels")
 
         dataset.annotate(
-            anno_key="test_fiftyone",
+            anno_key=anno_key,
             label_field="pre_annotation",
             classes=self.classes,
             label_type="detections",
@@ -45,11 +45,11 @@ class CVAT:
             headers={"X-Organization": "OpenTrafficCam"},
         )
 
-    def import_data(self) -> None:
+    def import_data(self, anno_key: str) -> None:
         dataset = fo.load_dataset("OTLabels")
 
         dataset.load_annotations(
-            anno_key="test_fiftyone",
+            anno_key=anno_key,
             dest_field="ground_truth",
             username=self.username,
             password=self.password,
