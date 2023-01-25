@@ -8,7 +8,7 @@ class TestYOLOv8:
         erwartetes_ergebnis = "data/image_data/Aachen_OTCamera12/images"
         rechner = PreAnnotateImages(
             config_file="OTLabels/config/training_data.json",
-            label_file="OTLabels/config/labels_COCO.json",
+            class_file="OTLabels/config/labels_COCO.json",
             filter_sites=["Aachen_OTCamera12"],
         )
         ergebnis: PreAnnotateImages = rechner.config["Aachen_OTCamera12"]["image_path"]
@@ -28,7 +28,7 @@ class TestYOLOv8:
     def test_init_labels(self, label_class, erwartetes_ergebnis) -> None:
         rechner = PreAnnotateImages(
             config_file="OTLabels/config/training_data.json",
-            label_file="OTLabels/config/labels_COCO.json",
+            class_file="OTLabels/config/labels_COCO.json",
         )
-        ergebnis: PreAnnotateImages = rechner.labels[label_class]
+        ergebnis: PreAnnotateImages = rechner.classes[label_class]
         assert erwartetes_ergebnis == ergebnis
