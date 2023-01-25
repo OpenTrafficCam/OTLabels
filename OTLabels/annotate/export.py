@@ -8,16 +8,19 @@ import fiftyone as fo
 class CVAT:
     def __init__(
         self,
-        username: str,
-        password: str,
         url: str,
+        security_file: str = "OTLabels/config/security.json",
         project_name: str = "",
         class_file: str = "",
     ):
 
+        if security_file != "":
+            with open(security_file) as json_file:
+                self.security = json.load(json_file)
+
         self.url = url
-        self.username = username
-        self.password = password
+        self.username = self.security["username"]
+        self.password = self.security["password"]
         self.project_name = project_name
 
         if class_file != "":
