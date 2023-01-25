@@ -1,7 +1,7 @@
 ---
 # This workflow will install Python dependencies, run tests
 
-name: Linting and tests
+name: CI CD
 
 on: [pull_request]
 
