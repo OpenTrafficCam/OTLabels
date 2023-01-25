@@ -33,11 +33,12 @@ jobs:
           pip install -r requirements.txt -r requirements-dev.txt
       - name: Lint codebase
         run: |
-          flake8 hbsbuddy
+          flake8 OTLabels
           flake8 tests
+          flake8 examples
           mypy .
       - name: Test with pytest
-        run: pytest --cov=hbsbuddy tests/
+        run: pytest --cov=OTLabels tests/
       - name: Log in to the Container registry
         uses: docker/login-action@v1
         with:
