@@ -1,0 +1,17 @@
+FROM ubuntu:20.04
+COPY requirements-training.txt requirements-training.txt
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    rm -rf /var/lib/apt/lists/*
+RUN add-apt-repository ppa:deadsnakes/ppa
+RUN apt-get update && \
+    apt-get install -y python3.10 python3-pip libx11-dev \
+    libgl1 gdal-bin libgdal-dev && \
+    rm -rf /var/lib/apt/lists/*
+RUN pip install --upgrade pip
+RUN pip install -r requirements-training.txt
+
+ENV PYTHONPATH /OpenTrafficCam/OTLabels
+WORKDIR /OpenTrafficCam/OTLabels
+COPY OTLabels OTLabels
+ENTRYPOINT [ "python3", "OTLabels/train_models.py" ]
