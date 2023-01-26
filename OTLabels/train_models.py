@@ -5,9 +5,9 @@ from OTLabels.helpers import machine
 
 def train_basic_model():
     checks()
-    model = YOLO("yolov8n.pt")  # pass any model type
+    model = YOLO("models/yolov8n.pt")  # pass any model type
     device = get_device()
-    model.train(data="train-config.yaml", epochs=1, device=device)
+    model.train(data="config/train-config.yaml", epochs=1, device=device)
 
 
 def get_device():
