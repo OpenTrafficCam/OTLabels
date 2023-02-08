@@ -54,7 +54,7 @@ class CVAT:
             headers={"X-Organization": self.organization_name},
         )
 
-    def import_data(self, anno_key: str) -> None:
+    def import_data(self, anno_key: str, launch_app: bool = True) -> None:
         dataset = fo.load_dataset("OTLabels")
 
         dataset.load_annotations(
@@ -65,5 +65,6 @@ class CVAT:
             url=self.url,
         )
 
-        session = fo.launch_app(dataset)
-        session.wait()
+        if launch_app:
+            session = fo.launch_app(dataset)
+            session.wait()
