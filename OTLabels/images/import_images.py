@@ -107,3 +107,7 @@ class ImportImages:
         if launch_app:
             session = fo.launch_app(dataset)
             session.wait()
+
+    def delete_dataset(self, name):
+        dataset = fo.load_dataset(name)
+        dataset.delete()
