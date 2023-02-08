@@ -28,9 +28,25 @@ class ImportImages:
             with open(class_file) as json_file:
                 self.classes = json.load(json_file)
 
-    def initial_import(self, import_labels: bool = False) -> None:
+    def initial_import(
+        self,
+        import_labels: bool = False,
+        launch_app: bool = False,
+        name: str = "OTLabels",
+        overwrite: bool = False,
+    ) -> None:
 
-        dataset = fo.Dataset(name="OTLabels", persistent=True)
+        if name in fo.list_datasets():
+            dataset = fo.load_dataset(name)
+            if overwrite:
+                dataset.delete()
+                dataset = fo.Dataset(name=name, persistent=True)
+                print(f"Overwriting Dataset {name}.")
+            else:
+                print(f"Dataset {name} already exists, loading it from database.")
+        else:
+            dataset = fo.Dataset(name=name, persistent=True)
+
         samples = []
         class_dict = {v: k for k, v in self.classes.items()}
 
@@ -87,3 +103,7 @@ class ImportImages:
 
         # Create dataset
         dataset.add_samples(samples)
+
+        if launch_app:
+            session = fo.launch_app(dataset)
+            session.wait()
