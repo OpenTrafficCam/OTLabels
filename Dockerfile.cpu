@@ -1,0 +1,8 @@
+FROM python:3.10-bullseye
+WORKDIR /OpenTrafficCam/OTLabels
+COPY requirements-training.txt requirements-training.txt
+RUN pip install --no-cache-dir -r requirements-training.txt
+
+ENV PYTHONPATH /OpenTrafficCam/OTLabels
+COPY OTLabels OTLabels
+ENTRYPOINT [ "python3.10", "OTLabels/train_models.py" ]

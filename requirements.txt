@@ -20,4 +20,4 @@ shapely==1.8.2
 torch
 torchvision
 tqdm==4.64.0
-ultralytics
+ultralytics==8.0.32
