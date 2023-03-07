@@ -15,7 +15,6 @@ class ImportImages:
         filter_sites: list = [],
         set_tags: bool = True,
     ) -> None:
-
         self.set_tags = set_tags
 
         with open(config_file) as json_file:
@@ -35,7 +34,6 @@ class ImportImages:
         name: str = "OTLabels",
         overwrite: bool = False,
     ) -> None:
-
         if name in fo.list_datasets():
             dataset = fo.load_dataset(name)
             if overwrite:
@@ -99,14 +97,19 @@ class ImportImages:
                     for tag in tags.keys():
                         sample[tag] = tags[tag]
 
-                    samples.append(sample)
+                    sample["status"] = "pre-annotated"
+
+                else:
+                    sample["status"] = "imported"
+
+                samples.append(sample)
 
         # Create dataset
         dataset.add_samples(samples)
 
         if launch_app:
-            session = fo.launch_app(dataset)
-            session.wait()
+            fo.launch_app(dataset)
+            # session.wait()
 
     def delete_dataset(self, name):
         dataset = fo.load_dataset(name)
