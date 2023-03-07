@@ -49,6 +49,7 @@ class CVAT:
         include_classes: tuple = (),
         overwrite_annotation: bool = False,
         keep_samples: bool = True,
+        set_status: bool = True,
     ) -> None:
         dataset = fo.load_dataset(dataset_name)
 
@@ -100,7 +101,10 @@ class CVAT:
                 headers={"X-Organization": self.organization_name},
             )
             print("INFO: Set status to 'in annotation' for selected images.")
-            dataset_filtered = self.set_status(dataset_filtered, "in annotation")
+
+            if set_status:
+                dataset_filtered = self.set_status(dataset_filtered, "in annotation")
+
         else:
             print("ERROR: No images to annotate! Please set your filters correctly.")
 
