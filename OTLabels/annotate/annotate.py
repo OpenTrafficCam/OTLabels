@@ -33,6 +33,8 @@ class CVAT:
         for sample in data.iter_samples(autosave=True, progress=True):
             sample["status"] = status
 
+        return data
+
     def export_data(
         self,
         anno_key: str,
@@ -58,7 +60,7 @@ class CVAT:
 
         if keep_samples:
             dataset_filtered = dataset.match(
-                F("status").is_in(["imported, pre-annotation"])
+                F("status").is_in(["imported", "pre-annotated"])
             )
             print("INFO: Excluding samples from existing annotation sessions.")
         else:
@@ -81,23 +83,26 @@ class CVAT:
             if samples > len(dataset_filtered):
                 print("WARNING: Number of samples is larger than number of images!")
 
-        dataset_filtered = self.set_status(dataset_filtered, "in annotation")
-
-        dataset_filtered.annotate(
-            anno_key=anno_key,
-            label_field=label_field,
-            classes=self.classes,
-            label_type="detections",
-            segment_size=segment_size,
-            task_assignee=task_assignee,
-            job_assignees=job_assignees,
-            job_reviewers=job_reviewers,
-            username=self.username,
-            password=self.password,
-            url=self.url,
-            project_name=self.project_name,
-            headers={"X-Organization": self.organization_name},
-        )
+        if len(dataset_filtered) > 0:
+            dataset_filtered.annotate(
+                anno_key=anno_key,
+                label_field=label_field,
+                classes=self.classes,
+                label_type="detections",
+                segment_size=segment_size,
+                task_assignee=task_assignee,
+                job_assignees=job_assignees,
+                job_reviewers=job_reviewers,
+                username=self.username,
+                password=self.password,
+                url=self.url,
+                project_name=self.project_name,
+                headers={"X-Organization": self.organization_name},
+            )
+            print("INFO: Set status to 'in annotation' for selected images.")
+            dataset_filtered = self.set_status(dataset_filtered, "in annotation")
+        else:
+            print("ERROR: No images to annotate! Please set your filters correctly.")
 
     # TODO: set status when reimported
     def import_data(

@@ -11,6 +11,7 @@ from OTLabels.images.import_images import ImportImages
 #     model_file="yolov8m.pt",
 # ).pre_annotate()
 
+
 imp = ImportImages(
     config_file="data/image_data/training_data.json",
     class_file="OTLabels/config/classes_COCO.json",
@@ -25,15 +26,17 @@ imp.initial_import(
 
 cvat = CVAT(
     url="https://label.opentrafficcam.org/",
-    project_name="OTLabels_test",
+    project_name="OTLabels",
     class_file="OTLabels/config/classes_OTC.json",
 )
-cvat.export_data(
-    anno_key="first_samples",
-    samples=1000,
-    segment_size=100,
-    exclude_labels=("bicyclist", "motorcyclist"),
-    include_classes=("pedestrian", "truck", "bus"),
-    overwrite_annotation=True,
-)
+for i in range(0, 5):
+    cvat.export_data(
+        anno_key=f"first_samples_{i}",
+        samples=1000,
+        segment_size=100,
+        exclude_labels=("bicyclist", "motorcyclist"),
+        include_classes=("pedestrian", "truck", "bus"),
+        # overwrite_annotation=True,
+    )
+    i += 1
 # cvat.import_data(anno_key="manual_samples", launch_app=True)
