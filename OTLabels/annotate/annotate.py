@@ -49,28 +49,39 @@ class CVAT:
         keep_samples: bool = True,
     ) -> None:
         dataset = fo.load_dataset(dataset_name)
-        dataset_filtered = dataset
+
+        runs = dataset.list_annotation_runs()
+
+        if overwrite_annotation and anno_key in runs:
+            dataset.delete_annotation_run(anno_key)
+            print(f"WARNING: Overwriting existing annotation session {anno_key}!")
+
+        if keep_samples:
+            dataset_filtered = dataset.match(
+                F("status").is_in(["imported, pre-annotation"])
+            )
+            print("INFO: Excluding samples from existing annotation sessions.")
+        else:
+            dataset_filtered = dataset
 
         if exclude_labels != ():
             dataset_filtered = dataset_filtered.filter_labels(
                 "pre_annotation", ~F("label").is_in(exclude_labels)
             )
+            print(f"INFO: Excluding classes {str(exclude_labels)} from images.")
 
         if include_classes != ():
             match = F("label").is_in(include_classes)
             dataset_filtered = dataset_filtered.match_labels(filter=match)
+            print(f"INFO: Ensure classes {str(include_classes)} are in images.")
 
         if samples > 0:
             dataset_filtered = dataset_filtered.take(samples)
-            dataset_filtered.tag_samples("in_annotation")
+            print(f"INFO: Taking {samples} samples.")
+            if samples > len(dataset_filtered):
+                print("WARNING: Number of samples is larger than number of images!")
 
-        runs = dataset_filtered.list_annotation_runs()
-
-        if keep_samples and anno_key in runs:
-            dataset_filtered = dataset_filtered.match_tags("in_annotation", bool=False)
-
-        if overwrite_annotation and anno_key in runs:
-            dataset_filtered.delete_annotation_run(anno_key)
+        dataset_filtered = self.set_status(dataset_filtered, "in annotation")
 
         dataset_filtered.annotate(
             anno_key=anno_key,
@@ -88,6 +99,7 @@ class CVAT:
             headers={"X-Organization": self.organization_name},
         )
 
+    # TODO: set status when reimported
     def import_data(
         self,
         anno_key: str,
