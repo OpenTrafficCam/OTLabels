@@ -15,7 +15,6 @@ class CVAT:
         project_name: str = "",
         class_file: str = "",
     ):
-
         if security_file != "":
             with open(security_file) as json_file:
                 self.security = json.load(json_file)
@@ -30,6 +29,10 @@ class CVAT:
             with open(class_file) as json_file:
                 self.classes = json.load(json_file)
 
+    def set_status(self, data, status: str):
+        for sample in data.iter_samples(autosave=True, progress=True):
+            sample["status"] = status
+
     def export_data(
         self,
         anno_key: str,
@@ -42,18 +45,16 @@ class CVAT:
         job_reviewers: list = [],
         dataset_name: str = "OTLabels",
         include_classes: tuple = (),
-        overwrite: bool = False,
+        overwrite_annotation: bool = False,
+        keep_samples: bool = True,
     ) -> None:
         dataset = fo.load_dataset(dataset_name)
+        dataset_filtered = dataset
 
         if exclude_labels != ():
-            dataset.filter_labels(
-                "pre_annotation", eval("F('label').is_in({exclude_labels})")
-            ).tag_labels("exclude")
-            dataset.delete_labels(tags="exclude")
-            dataset_filtered = dataset
-        else:
-            dataset_filtered = dataset
+            dataset_filtered = dataset_filtered.filter_labels(
+                "pre_annotation", ~F("label").is_in(exclude_labels)
+            )
 
         if include_classes != ():
             match = F("label").is_in(include_classes)
@@ -61,12 +62,15 @@ class CVAT:
 
         if samples > 0:
             dataset_filtered = dataset_filtered.take(samples)
+            dataset_filtered.tag_samples("in_annotation")
 
-        if overwrite:
-            runs = dataset_filtered.list_annotation_runs()
+        runs = dataset_filtered.list_annotation_runs()
 
-            if anno_key in runs:
-                dataset_filtered.delete_annotation_run(anno_key)
+        if keep_samples and anno_key in runs:
+            dataset_filtered = dataset_filtered.match_tags("in_annotation", bool=False)
+
+        if overwrite_annotation and anno_key in runs:
+            dataset_filtered.delete_annotation_run(anno_key)
 
         dataset_filtered.annotate(
             anno_key=anno_key,
