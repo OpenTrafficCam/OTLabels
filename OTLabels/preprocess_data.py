@@ -12,12 +12,12 @@ from OTLabels.images.import_images import ImportImages
 # ).pre_annotate()
 
 
-imp = ImportImages(
+importer = ImportImages(
     config_file="data/image_data/training_data_T30.json",
     class_file="OTLabels/config/classes_COCO.json",
 )
 # imp.delete_dataset("OTLabels_no_bicycles_preannotated")
-imp.initial_import(
+importer.initial_import(
     import_labels=True,
     launch_app=True,
     name="T30_img",
@@ -31,7 +31,7 @@ cvat = CVAT(
 )
 for i in range(0, 5):
     cvat.export_data(
-        anno_key=f"T30_samples_{i}",
+        annotation_key=f"T30_samples_{i}",
         samples=1000,
         segment_size=100,
         exclude_labels=("bicyclist", "motorcyclist"),
@@ -39,5 +39,4 @@ for i in range(0, 5):
         dataset_name="T30_img",
         overwrite_annotation=True,
     )
-    i += 1
 # cvat.import_data(anno_key="manual_samples", launch_app=True)

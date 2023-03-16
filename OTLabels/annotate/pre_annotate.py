@@ -4,9 +4,11 @@
 import json
 from pathlib import Path
 
-import pandas as pd
+import pandas
 from tqdm import tqdm
 from ultralytics import YOLO
+
+LABEL_GLOB: str = "*.txt"
 
 
 class PreAnnotateImages:
@@ -30,9 +32,8 @@ class PreAnnotateImages:
                 self.classes = json.load(json_file)
 
     def _filter_classes(self, site, label_dir) -> None:
-
         classes = self.classes
-        ann_files = [str(file) for file in label_dir.glob("*.txt")]
+        annotation_files = [str(file) for file in label_dir.glob(LABEL_GLOB)]
 
         print(
             f"Filter labels in {label_dir} by class "
@@ -40,17 +41,16 @@ class PreAnnotateImages:
             + "..."
         )
 
-        for ann_file in tqdm(ann_files):
-
-            if Path(ann_file).stat().st_size > 0:
-                file_labels = pd.read_csv(ann_file, header=None, sep=" ")
+        for annotation_file in tqdm(annotation_files):
+            if Path(annotation_file).stat().st_size > 0:
+                file_labels = pandas.read_csv(annotation_file, header=None, sep=" ")
             else:
                 continue
 
             file_labels = file_labels[file_labels[0].isin(classes.values())]
 
             file_labels.to_csv(
-                ann_file,
+                annotation_file,
                 header=False,
                 sep=" ",
                 index=False,
@@ -60,7 +60,7 @@ class PreAnnotateImages:
     def pre_annotate(self) -> None:
         for site in self.config:
             label_dir = Path(self.config[site]["label_path"] + "/labels")
-            labels = label_dir.glob("*.txt")
+            labels = label_dir.glob(LABEL_GLOB)
             n = 0
             for label in labels:
                 Path.unlink(label)

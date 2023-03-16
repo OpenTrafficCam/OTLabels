@@ -4,6 +4,7 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 
+from pyparsing import Any
 from tqdm import tqdm
 
 
@@ -47,17 +48,21 @@ class Site:
         self.comments = comments
         self.files = list(input_path.glob(f"*{name}*"))
         file_names = [str(f) for f in self.files]
-        file_dates = [
-            datetime.strptime(
-                value.group(),
-                "%Y-%m-%d_%H-%M-%S",
-            )
-            for f in file_names
-            if (value := re.search(r"\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}", f))
-        ]
 
-        if self.video_files == []:
-            self.video_files = list(
+        def _get_file_dates(file_names) -> list[datetime]:
+            return [
+                datetime.strptime(
+                    value.group(),
+                    "%Y-%m-%d_%H-%M-%S",
+                )
+                for f in file_names
+                if (value := re.search(r"\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}", f))
+            ]
+
+        file_dates = _get_file_dates(file_names)
+
+        def _set_video_files(file_names) -> list[dict[str, Any]]:
+            return [
                 dict.fromkeys(
                     [
                         value.group(1).split("/")[-1] + ".mp4"
@@ -65,7 +70,10 @@ class Site:
                         if (value := re.search("/(.*).mp4", s))
                     ]
                 )
-            )
+            ]
+
+        if self.video_files == []:
+            self.video_files = _set_video_files(file_names)
         self.recording_start_date = min(file_dates)
         self.recording_end_date = max(file_dates)
 
@@ -92,21 +100,21 @@ class ImageSet:
     def copy(self) -> None:
         data_json = dict()
         for site in self.image_set:
-
             print(f"Copy files for Site {site.name}...")
+
+            site_path = f"{site.output_path}/{site.name}"
 
             data_json[site.name] = {
                 "tags": site.tags,
-                "image_path": f"{site.output_path}/{site.name}/images",
-                "label_path": f"{site.output_path}/{site.name}",
+                "image_path": f"{site_path}/images",
+                "label_path": f"{site_path}/{site.name}",
             }
 
             for image in tqdm(site.files):
-
                 from_file = image
-                to_dir = f"{site.output_path}/{site.name}/images"
-                to_file = Path(f"{to_dir}/{str(image).split('/')[-1]}")
-                if not Path.exists(Path(to_dir)):
+                to_dir = Path(f"{site.output_path}/{site.name}/images")
+                to_file = Path(to_dir, f"{str(image).split('/')[-1]}")
+                if not to_dir.exists():
                     Path(to_dir).mkdir(parents=True, exist_ok=True)
 
                 shutil.copy(from_file, to_file)

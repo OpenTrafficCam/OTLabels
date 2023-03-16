@@ -2,8 +2,8 @@
 
 import json
 
-import fiftyone as fo
-from fiftyone import ViewField as F
+import fiftyone
+from fiftyone import ViewField
 
 
 class CVAT:
@@ -37,7 +37,7 @@ class CVAT:
 
     def export_data(
         self,
-        anno_key: str,
+        annotation_key: str,
         label_field: str = "pre_annotation",
         samples: int = 0,
         exclude_labels: tuple = (),
@@ -51,17 +51,17 @@ class CVAT:
         keep_samples: bool = True,
         set_status: bool = True,
     ) -> None:
-        dataset = fo.load_dataset(dataset_name)
+        dataset = fiftyone.load_dataset(dataset_name)
 
         runs = dataset.list_annotation_runs()
 
-        if overwrite_annotation and anno_key in runs:
-            dataset.delete_annotation_run(anno_key)
-            print(f"WARNING: Overwriting existing annotation session {anno_key}!")
+        if overwrite_annotation and annotation_key in runs:
+            dataset.delete_annotation_run(annotation_key)
+            print(f"WARNING: Overwriting existing annotation session {annotation_key}!")
 
         if keep_samples:
             dataset_filtered = dataset.match(
-                F("status").is_in(["imported", "pre-annotated"])
+                ViewField("status").is_in(["imported", "pre-annotated"])
             )
             print("INFO: Excluding samples from existing annotation sessions.")
         else:
@@ -69,12 +69,12 @@ class CVAT:
 
         if exclude_labels != ():
             dataset_filtered = dataset_filtered.filter_labels(
-                "pre_annotation", ~F("label").is_in(exclude_labels)
+                "pre_annotation", ~ViewField("label").is_in(exclude_labels)
             )
             print(f"INFO: Excluding classes {str(exclude_labels)} from images.")
 
         if include_classes != ():
-            match = F("label").is_in(include_classes)
+            match = ViewField("label").is_in(include_classes)
             dataset_filtered = dataset_filtered.match_labels(filter=match)
             print(f"INFO: Ensure classes {str(include_classes)} are in images.")
 
@@ -86,7 +86,7 @@ class CVAT:
 
         if len(dataset_filtered) > 0:
             dataset_filtered.annotate(
-                anno_key=anno_key,
+                annotation_key=annotation_key,
                 label_field=label_field,
                 classes=self.classes,
                 label_type="detections",
@@ -111,14 +111,14 @@ class CVAT:
     # TODO: set status when reimported
     def import_data(
         self,
-        anno_key: str,
+        annotation_key: str,
         launch_app: bool = True,
         dataset_name: str = "OTLabels",
     ) -> None:
-        dataset = fo.load_dataset(dataset_name)
+        dataset = fiftyone.load_dataset(dataset_name)
 
         dataset.load_annotations(
-            anno_key=anno_key,
+            annotation_key=annotation_key,
             dest_field="ground_truth",
             username=self.username,
             password=self.password,
@@ -126,5 +126,5 @@ class CVAT:
         )
 
         if launch_app:
-            session = fo.launch_app(dataset)
+            session = fiftyone.launch_app(dataset)
             session.wait()

@@ -3,8 +3,8 @@
 import json
 from pathlib import Path
 
-import fiftyone as fo
-import pandas as pd
+import fiftyone
+import pandas
 
 
 class ImportImages:
@@ -34,30 +34,30 @@ class ImportImages:
         name: str = "OTLabels",
         overwrite: bool = False,
     ) -> None:
-        if name in fo.list_datasets():
-            dataset = fo.load_dataset(name)
+        if name in fiftyone.list_datasets():
+            dataset = fiftyone.load_dataset(name)
             if overwrite:
                 dataset.delete()
-                dataset = fo.Dataset(name=name, persistent=True)
+                dataset = fiftyone.Dataset(name=name, persistent=True)
                 print(f"Overwriting Dataset {name}.")
             else:
                 print(f"Dataset {name} already exists, loading it from database.")
         else:
-            dataset = fo.Dataset(name=name, persistent=True)
+            dataset = fiftyone.Dataset(name=name, persistent=True)
 
         samples = []
-        class_dict = {v: k for k, v in self.classes.items()}
+        class_dict = {id: label for label, id in self.classes.items()}
 
         for site in self.config:
             img_dir = Path(self.config[site]["image_path"])
-            img_patt = img_dir.glob("*")
+            image_pattern = img_dir.glob("*")
 
-            for img in img_patt:
-                sample = fo.Sample(filepath=img)
+            for img in image_pattern:
+                sample = fiftyone.Sample(filepath=img)
 
                 if import_labels:
                     detections = []
-                    file_type = str(img).split(".")[-1]
+                    file_type = Path(img).suffix
                     label_path = (
                         str(img)
                         .replace("images", "labels")
@@ -68,7 +68,7 @@ class ImportImages:
                         Path(label_path).exists()
                         and Path(label_path).stat().st_size > 0
                     ):
-                        labels = pd.read_csv(label_path, sep=" ", header=None)
+                        labels = pandas.read_csv(label_path, sep=" ", header=None)
 
                         for i in labels.index:
                             label = labels.loc[[i]]
@@ -82,15 +82,17 @@ class ImportImages:
                             ]
 
                             detections.append(
-                                fo.Detection(
+                                fiftyone.Detection(
                                     label=label_class, bounding_box=bounding_box
                                 )
                             )
 
-                        sample["pre_annotation"] = fo.Detections(detections=detections)
+                        sample["pre_annotation"] = fiftyone.Detections(
+                            detections=detections
+                        )
 
                     else:
-                        sample["pre_annotation"] = fo.Detections()
+                        sample["pre_annotation"] = fiftyone.Detections()
 
                     tags = self.config[site]["tags"]
 
@@ -108,9 +110,9 @@ class ImportImages:
         dataset.add_samples(samples)
 
         if launch_app:
-            fo.launch_app(dataset)
+            fiftyone.launch_app(dataset)
             # session.wait()
 
     def delete_dataset(self, name):
-        dataset = fo.load_dataset(name)
+        dataset = fiftyone.load_dataset(name)
         dataset.delete()
