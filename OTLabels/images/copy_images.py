@@ -49,31 +49,10 @@ class Site:
         self.files = list(input_path.glob(f"*{name}*"))
         file_names = [str(f) for f in self.files]
 
-        def _get_file_dates(file_names) -> list[datetime]:
-            return [
-                datetime.strptime(
-                    value.group(),
-                    "%Y-%m-%d_%H-%M-%S",
-                )
-                for f in file_names
-                if (value := re.search(r"\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}", f))
-            ]
-
-        file_dates = _get_file_dates(file_names)
-
-        def _set_video_files(file_names) -> list[dict[str, Any]]:
-            return [
-                dict.fromkeys(
-                    [
-                        value.group(1).split("/")[-1] + ".mp4"
-                        for s in file_names
-                        if (value := re.search("/(.*).mp4", s))
-                    ]
-                )
-            ]
+        file_dates = self._get_file_dates(file_names)
 
         if self.video_files == []:
-            self.video_files = _set_video_files(file_names)
+            self.video_files = self._set_video_files(file_names)
         self.recording_start_date = min(file_dates)
         self.recording_end_date = max(file_dates)
 
@@ -89,6 +68,27 @@ class Site:
             "video_files": self.video_files,
             "comments": self.comments,
         }
+
+    def _set_video_files(self, file_names) -> list[dict[str, Any]]:
+        return [
+            dict.fromkeys(
+                [
+                    value.group(1).split("/")[-1] + ".mp4"
+                    for s in file_names
+                    if (value := re.search("/(.*).mp4", s))
+                ]
+            )
+        ]
+
+    def _get_file_dates(self, file_names) -> list[datetime]:
+        return [
+            datetime.strptime(
+                value.group(),
+                "%Y-%m-%d_%H-%M-%S",
+            )
+            for f in file_names
+            if (value := re.search(r"\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}", f))
+        ]
 
 
 class ImageSet:
