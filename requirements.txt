@@ -21,3 +21,4 @@ torch
 torchvision
 tqdm==4.64.0
 ultralytics==8.0.32
+yolov5==7.0.11
