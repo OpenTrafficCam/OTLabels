@@ -86,7 +86,7 @@ class CVAT:
 
         if len(dataset_filtered) > 0:
             dataset_filtered.annotate(
-                annotation_key=annotation_key,
+                anno_key=annotation_key,
                 label_field=label_field,
                 classes=self.classes,
                 label_type="detections",
