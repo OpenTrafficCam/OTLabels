@@ -15,5 +15,6 @@
     "truck_with_trailer": 13,
     "bus": 5,
     "train": 6,
-    "other": 16
+    "truck_with_semitrailer": 16,
+    "other": 17
 }
