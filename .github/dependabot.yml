@@ -10,9 +10,9 @@ updates:
     schedule:
       interval: "weekly"
     reviewers:
-      - "briemla"
+      - "MichHeilig"
     assignees:
-      - "briemla"
+      - "MichHeilig"
   - package-ecosystem: "github-actions" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
