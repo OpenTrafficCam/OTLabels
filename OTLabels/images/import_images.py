@@ -61,7 +61,7 @@ class ImportImages:
                     label_path = (
                         str(img)
                         .replace("images", "labels")
-                        .replace(str(file_type), "txt")
+                        .replace(str(file_type), ".txt")
                     )
 
                     if (
@@ -92,6 +92,8 @@ class ImportImages:
                         )
 
                     else:
+                        """with open(label_path, "w") as file:
+                        pass"""
                         sample["pre_annotation"] = fiftyone.Detections()
 
                     tags = self.config[site]["tags"]
@@ -110,8 +112,8 @@ class ImportImages:
         dataset.add_samples(samples)
 
         if launch_app:
-            fiftyone.launch_app(dataset)
-            # session.wait()
+            session = fiftyone.launch_app(dataset)
+            session.wait()
 
     def delete_dataset(self, name):
         dataset = fiftyone.load_dataset(name)

@@ -59,7 +59,7 @@ class PreAnnotateImages:
 
     def pre_annotate(self) -> None:
         for site in self.config:
-            label_dir = Path(self.config[site]["label_path"] + "/labels")
+            label_dir = Path(self.config[site]["label_path"] + "/pre_annotation_labels")
             labels = label_dir.glob(LABEL_GLOB)
             n = 0
             for label in labels:
@@ -78,7 +78,9 @@ class PreAnnotateImages:
             predictor(source="https://ultralytics.com/images/bus.jpg")
             Path.unlink(Path("./bus.jpg"))
             self.model.predictor.save_dir = Path(self.config[site]["label_path"])
-            predictor(source=self.config[site]["image_path"], save_txt=True)
+            predictor(
+                source=self.config[site]["image_path"], save_txt=True, agnostic_nms=True
+            )
 
             if self.classes:
                 self._filter_classes(site, label_dir)
