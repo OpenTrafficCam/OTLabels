@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-echo "Install OTAnalytics development environment."
+echo "Install OTLabels development environment."
 
 WORKING_DIR=$(pwd)
 VENV="$WORKING_DIR"/venv
