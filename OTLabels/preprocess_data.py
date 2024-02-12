@@ -1,15 +1,15 @@
 """Preprocess image data for annotation in CVAT"""
 
-# from annotate.pre_annotate import PreAnnotateImages
+from annotate.pre_annotate import PreAnnotateImages
 
 from OTLabels.annotate.annotate import CVAT
 from OTLabels.images.import_images import ImportImages
 
-# PreAnnotateImages(
-#     config_file="data/image_data/training_data.json",
-#     class_file="OTLabels/config/classes_COCO.json",
-#     model_file="yolov8m.pt",
-# ).pre_annotate()
+PreAnnotateImages(
+    config_file="data/image_data/training_data.json",
+    class_file="OTLabels/config/classes_COCO.json",
+    model_file="yolov8m.pt",
+).pre_annotate()
 
 
 importer = ImportImages(
