@@ -1,0 +1,38 @@
+{
+    "Aachen_OTCamera12": {
+        "tags": {
+            "site": "Aachen 1",
+            "cam_type": "OpenTrafficCam",
+            "recording_start_date": "",
+            "recording_end_date": "",
+            "lense_type": "fisheye",
+            "geolocation": {
+                "lat": "6.086508440107006",
+                "lon": "50.77834966734618"
+            },
+            "height": "5m",
+            "occasion": "Tempo30",
+            "video_file": "XXX.mp4",
+            "comments": "TEST"
+        },
+        "image_path": "data/image_data/Aachen_OTCamera12/images",
+        "label_path": "data/image_data/Aachen_OTCamera12"
+    },
+    "Aachen_OTCamera13": {
+        "tags": {
+            "site": "Aachen 2",
+            "cam_type": "OpenTrafficCam",
+            "recording_date": "",
+            "lense_type": "normal",
+            "geolocation": {
+                "lat": "6.086508440107006",
+                "lon": "50.77834966734618"
+            },
+            "height": "5m",
+            "occasion": "Tempo30",
+            "comments": "TEST"
+        },
+        "image_path": "data/image_data/Aachen_OTCamera13/images",
+        "label_path": "data/image_data/Aachen_OTCamera13"
+    }
+}
