@@ -1,4 +1,4 @@
-fiftyone
+fiftyone==0.23.0
 fiona
 geopandas
 IPython
