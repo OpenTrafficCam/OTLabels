@@ -1,23 +1,24 @@
 fiftyone
 fiona
-geopandas
+geopandas==1.0.1
 IPython
 matplotlib
-numpy
-opencv-python
-pandas
-Pillow
+numpy==1.26.4 # ultralytics requires numpy < 2.0.0
+opencv-python==4.9.0.80
+pandas==2.2.2
+pillow==10.4.0
 progressbar33
-pygeos
+pygeos==0.14
 pyogrio
 pyproj
-PyYAML
+PyYAML==6.0.2
 
 # YOLOv5
 requests
-seaborn
-shapely
-torch
-torchvision
-tqdm
-ultralytics
+seaborn==0.13.2
+shapely==2.0.4
+# Follow instructions at https://pytorch.org to install torch with CUDA
+torch==2.3.1 #  NOTE: Omit if using torch with CUDA and install manually
+torchvision==0.18.1 # NOTE: Omit if using torch with CUDA and install manually
+tqdm==4.66.5
+ultralytics==8.2.82

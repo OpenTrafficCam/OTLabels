@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 import pandas
+from pandas import DataFrame
 from tqdm import tqdm
 from ultralytics import YOLO
 
@@ -42,19 +43,20 @@ class PreAnnotateImages:
         )
 
         for annotation_file in tqdm(annotation_files):
-            if Path(annotation_file).stat().st_size > 0:
-                file_labels = pandas.read_csv(annotation_file, header=None, sep=" ")
-            else:
+            if Path(annotation_file).stat().st_size <= 0:
                 continue
-
-            file_labels = file_labels[file_labels[0].isin(classes.values())]
-
-            file_labels.to_csv(
+            file_labels: DataFrame = pandas.read_csv(
                 annotation_file,
+                header=None,
+                sep=" ",
+            )
+            file_labels = file_labels[file_labels[0].isin(classes.values())]
+            file_labels.to_csv(
+                path_or_buf=Path(annotation_file),
                 header=False,
                 sep=" ",
                 index=False,
-                line_terminator="\n",
+                lineterminator="\n",
             )
 
     def pre_annotate(self) -> None:
