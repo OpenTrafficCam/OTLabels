@@ -20,7 +20,7 @@ importer = ImportImages(
 importer.initial_import(
     import_labels=True,
     launch_app=True,
-    name="mioVision_SH",
+    dataset_name="mioVision_SH",
     overwrite=True,
 )
 
