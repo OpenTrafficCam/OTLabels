@@ -10,7 +10,7 @@ class CVAT:
     def __init__(
         self,
         url: str,
-        security_file: str = "OTLabels/config/security.json",
+        security_file: str = "config/security.json",
         organization_name: str = "OpenTrafficCam",
         project_name: str = "",
         class_file: str = "",
@@ -42,8 +42,8 @@ class CVAT:
         samples: int = 0,
         exclude_labels: tuple = (),
         segment_size: int = 25,
-        task_assignee: str = "armin",
-        job_assignees: list = [""],
+        task_assignee: str = "lars",
+        job_assignees: list = ["lars"],
         dataset_name: str = "OTLabels",
         include_classes: tuple = (),
         overwrite_annotation: bool = False,
@@ -96,6 +96,7 @@ class CVAT:
                 password=self.password,
                 url=self.url,
                 project_name=self.project_name,
+                backend="cvat",
                 headers={"X-Organization": self.organization_name},
             )
             print("INFO: Set status to 'in annotation' for selected images.")
