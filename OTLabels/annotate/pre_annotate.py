@@ -20,7 +20,7 @@ class PreAnnotateImages:
         filter_sites: list = [],
         model_file: str = "yolov8n.pt",
     ) -> None:
-        self.model = YOLO(model_file)
+        self.model = YOLO(model_file, task="detect")
 
         with open(config_file) as json_file:
             self.config = json.load(json_file)
@@ -77,9 +77,12 @@ class PreAnnotateImages:
             so the output directory for the labels can be edited.
             """
             # TODO: edit output directory in a smarter way
-            predictor(source="https://ultralytics.com/images/bus.jpg")
-            Path.unlink(Path("./bus.jpg"))
-            self.model.predictor.save_dir = Path(self.config[site]["label_path"])
+            img_dir = Path(self.config[site]["image_path"])
+            image_pattern = img_dir.glob("*.png")
+            first_image = next(image_pattern)
+            predictor(source=first_image)
+            Path.unlink(Path(first_image))
+            self.model.predictor.save_dir = Path(self.config[site]["image_path"])
             predictor(
                 source=self.config[site]["image_path"], save_txt=True, agnostic_nms=True
             )
