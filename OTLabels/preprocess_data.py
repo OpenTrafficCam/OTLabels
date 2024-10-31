@@ -3,19 +3,25 @@
 # from annotate.pre_annotate import PreAnnotateImages
 
 from OTLabels.annotate.annotate import CVAT
+from OTLabels.annotate.pre_annotate import PreAnnotateImages
 from OTLabels.images.import_images import ImportImages
 
 data_config = "data/image_data/training_data_svz.json"
 class_file = "OTLabels/config/classes_OTC.json"
-model_file = (
+local_model_file = (
     "/Users/larsbriem/platomo/data/Modelle/"
     "OTCv1-2_yolov8l_mio_batch3_OTC_v0-1-4.mlpackage"
 )
-# PreAnnotateImages(
-#     config_file=data_config,
-#     class_file=class_file,
-#     model_file=model_file,
-# ).pre_annotate()
+remote_model_file = (
+    "/Volumes/platomo data/Produkte/OpenTrafficCam/OTLabels/Modelle"
+    "/OTC/OTCv1-2_yolov8l_OTC_v0-1-4_imgsz800.engine"
+)
+model_file = remote_model_file
+PreAnnotateImages(
+    config_file=data_config,
+    class_file=class_file,
+    model_file=model_file,
+).pre_annotate()
 
 importer = ImportImages(
     config_file=data_config,
