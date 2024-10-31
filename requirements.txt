@@ -1,5 +1,6 @@
 fiftyone
 fiona
+fire==0.6.0
 geopandas==1.0.1
 IPython
 matplotlib
