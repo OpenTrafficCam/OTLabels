@@ -6,7 +6,7 @@ from OTLabels.annotate.annotate import CVAT
 from OTLabels.annotate.pre_annotate import PreAnnotateImages
 from OTLabels.images.import_images import ImportImages
 
-data_config = "data/image_data/training_data_svz.json"
+data_config = "data/image_data/training_data_svz_all_separate_labels.json"
 class_file = "OTLabels/config/classes_OTC.json"
 local_model_file = (
     "/Users/larsbriem/platomo/data/Modelle/"
@@ -14,7 +14,8 @@ local_model_file = (
 )
 remote_model_file = (
     "/Volumes/platomo data/Produkte/OpenTrafficCam/OTLabels/Modelle"
-    "/OTC/OTCv1-2_yolov8l_OTC_v0-1-4_imgsz800.engine"
+    "/mioVision/OTCv1-2_yolov8l_mio_batch3_OTC_v0-1-4_fp16.engine"
+    # "/OTC/OTCv1-2_yolov8l_OTC_v0-1-4_imgsz800.engine"
 )
 model_file = remote_model_file
 PreAnnotateImages(
@@ -37,6 +38,7 @@ importer.initial_import(
     overwrite=True,
 )
 
+exit(0)
 cvat = CVAT(
     url="https://label.opentrafficcam.org/",
     project_name="SVZ-Test",
@@ -48,7 +50,8 @@ for i in range(0, 1):
         samples=1000,
         segment_size=100,
         exclude_labels=(),  # ("bicyclist", "motorcyclist"),
-        include_classes=(),  # ("pedestrian", "truck", "bus"),
+        include_classes=("truck", "truck_with_trailer"),
+        # ("pedestrian", "truck", "bus"),
         dataset_name=dataset_name,
         overwrite_annotation=True,
         keep_samples=False,
