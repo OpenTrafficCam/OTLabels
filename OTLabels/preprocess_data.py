@@ -12,10 +12,14 @@ local_model_file = (
     "/Users/larsbriem/platomo/data/Modelle/"
     "OTCv1-2_yolov8l_mio_batch3_OTC_v0-1-4.mlpackage"
 )
-remote_model_file = (
+gpu_model_file = (
     "/Volumes/platomo data/Produkte/OpenTrafficCam/OTLabels/Modelle"
     "/mioVision/OTCv1-2_yolov8l_mio_batch3_OTC_v0-1-4_fp16.engine"
     # "/OTC/OTCv1-2_yolov8l_OTC_v0-1-4_imgsz800.engine"
+)
+remote_model_file = (
+    "/Volumes/platomo data/Produkte/OpenTrafficCam/OTLabels/Modelle"
+    "/mioVision/OTCv1-2_yolov8l_mio_batch3_OTC_v0-1-4_fp16.mlpackage"
 )
 model_file = remote_model_file
 PreAnnotateImages(
