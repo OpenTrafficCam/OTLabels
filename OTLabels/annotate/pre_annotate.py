@@ -79,13 +79,18 @@ class PreAnnotateImages:
             # TODO: edit output directory in a smarter way
             img_dir = Path(self.config[site]["image_path"])
             image_pattern = img_dir.glob("*.png")
-            first_image = next(image_pattern)
-            predictor(source=first_image)
-            Path.unlink(Path(first_image))
-            self.model.predictor.save_dir = Path(self.config[site]["image_path"])
-            predictor(
-                source=self.config[site]["image_path"], save_txt=True, agnostic_nms=True
-            )
+            try:
+                first_image = next(image_pattern)
+                predictor(source=first_image)
+                Path.unlink(Path(first_image))
+                self.model.predictor.save_dir = Path(self.config[site]["image_path"])
+                predictor(
+                    source=self.config[site]["image_path"],
+                    save_txt=True,
+                    agnostic_nms=True,
+                )
 
-            if self.classes:
-                self._filter_classes(site, label_dir)
+                if self.classes:
+                    self._filter_classes(site, label_dir)
+            except StopIteration:
+                continue
