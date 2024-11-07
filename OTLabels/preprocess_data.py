@@ -1,10 +1,13 @@
 """Preprocess image data for annotation in CVAT"""
 
-# from annotate.pre_annotate import PreAnnotateImages
+import json
 
 from OTLabels.annotate.annotate import CVAT
-from OTLabels.annotate.pre_annotate import PreAnnotateImages
+from OTLabels.dataset.generator import generate_dataset_config
 from OTLabels.images.import_images import ImportImages
+
+# from annotate.pre_annotate import PreAnnotateImages
+
 
 data_config = "data/image_data/training_data_svz_all_separate_labels.json"
 class_file = "OTLabels/config/classes_OTC.json"
@@ -22,39 +25,48 @@ remote_model_file = (
     "/mioVision/OTCv1-2_yolov8l_mio_batch3_OTC_v0-1-4_fp16.mlpackage"
 )
 model_file = remote_model_file
-PreAnnotateImages(
-    config_file=data_config,
-    class_file=class_file,
-    model_file=model_file,
-).pre_annotate()
+classes = {}
+with open(class_file) as json_file:
+    classes = json.load(json_file)
+all_classes = classes.keys()
 
-importer = ImportImages(
-    config_file=data_config,
-    class_file=class_file,
-    otc_pipeline_import=True,
-)
-# imp.delete_dataset("OTLabels_no_bicycles_preannotated")
-dataset_name = "SVZ_Img"
-importer.initial_import(
-    import_labels=True,
-    launch_app=True,
-    dataset_name=dataset_name,
-    overwrite=True,
-)
+dataset_prefix = "SVZ_Img"
 
-exit(0)
+# PreAnnotateImages(
+#     config_file=data_config,
+#     class_file=class_file,
+#     model_file=model_file,
+# ).pre_annotate()
+
 cvat = CVAT(
     url="https://label.opentrafficcam.org/",
-    project_name="SVZ-Test",
+    project_name="SVZ-Labels",
     class_file=class_file,
 )
-for i in range(0, 1):
+
+for key, value in classes.items():
+    config = generate_dataset_config([key])
+    dataset_name = f"{dataset_prefix}_{key}"
+    importer = ImportImages(
+        config=config,
+        class_file=class_file,
+        otc_pipeline_import=True,
+    )
+    # imp.delete_dataset("OTLabels_no_bicycles_preannotated")
+
+    importer.initial_import(
+        import_labels=True,
+        launch_app=False,
+        dataset_name=dataset_name,
+        overwrite=True,
+    )
+
     cvat.export_data(
-        annotation_key=f"SVZ_samples_{i}",
-        samples=1000,
+        annotation_key=f"SVZ_samples_{key}",
+        samples=0,
         segment_size=100,
         exclude_labels=(),  # ("bicyclist", "motorcyclist"),
-        include_classes=("truck", "truck_with_trailer"),
+        include_classes=(),
         # ("pedestrian", "truck", "bus"),
         dataset_name=dataset_name,
         overwrite_annotation=True,

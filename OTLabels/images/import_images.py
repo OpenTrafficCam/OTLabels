@@ -11,7 +11,8 @@ import pandas
 class ImportImages:
     def __init__(
         self,
-        config_file: str,
+        config_file: str | None = None,
+        config: dict | None = None,
         class_file: str = "",
         filter_sites: list = [],
         set_tags: bool = True,
@@ -20,11 +21,16 @@ class ImportImages:
         self.set_tags = set_tags
         self.otc_pipeline_import = otc_pipeline_import
 
-        with open(config_file) as json_file:
-            self.config = json.load(json_file)
+        if config:
+            self.config = config
+        else:
+            if config_file is None:
+                raise FileNotFoundError()
+            with open(config_file) as json_file:
+                self.config = json.load(json_file)
 
-            if len(filter_sites) > 0:
-                self.config = self.config[filter_sites]
+        if len(filter_sites) > 0:
+            self.config = self.config[filter_sites]
 
         if class_file != "":
             with open(class_file) as json_file:

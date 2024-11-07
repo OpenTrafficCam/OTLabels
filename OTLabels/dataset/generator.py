@@ -7,8 +7,15 @@ import fire
 def generate(
     output_file: Path, class_file: Path = Path("OTLabels/config/classes_OTC.json")
 ) -> None:
-    resolutions = ["720x480", "960x540", "1280x720"]
     classifications = load_classifications(class_file)
+    all_datasets = generate_dataset_config(classifications)
+
+    with open(output_file, mode="w") as output:
+        json.dump(all_datasets, output, indent=2)
+
+
+def generate_dataset_config(classifications: list[str]) -> dict:
+    resolutions = ["720x480", "960x540", "1280x720"]
     all_datasets = {}
     for resolution in resolutions:
         for classification in classifications:
@@ -17,9 +24,7 @@ def generate(
                 resolution=resolution,
             )
             all_datasets[key] = value
-
-    with open(output_file, mode="w") as output:
-        json.dump(all_datasets, output, indent=2)
+    return all_datasets
 
 
 def load_classifications(class_file: Path) -> list[str]:
