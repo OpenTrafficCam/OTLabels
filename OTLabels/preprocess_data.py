@@ -37,14 +37,19 @@ dataset_prefix = "SVZ_Img"
 #     class_file=class_file,
 #     model_file=model_file,
 # ).pre_annotate()
-
+upload_classes = classes
+manual_classes = {
+    "truck_with_semitrailer": 16,
+    "other": 17,
+}
+upload_classes = classes
 cvat = CVAT(
     url="https://label.opentrafficcam.org/",
-    project_name="SVZ-Labels",
+    project_name="SVZ-different-class",
     class_file=class_file,
 )
 
-for key, value in classes.items():
+for key, value in upload_classes.items():
     config = generate_dataset_config([key])
     dataset_name = f"{dataset_prefix}_{key}"
     importer = ImportImages(
@@ -52,8 +57,6 @@ for key, value in classes.items():
         class_file=class_file,
         otc_pipeline_import=True,
     )
-    # imp.delete_dataset("OTLabels_no_bicycles_preannotated")
-
     importer.initial_import(
         import_labels=True,
         launch_app=False,
@@ -65,11 +68,9 @@ for key, value in classes.items():
         annotation_key=f"SVZ_samples_{key}",
         samples=0,
         segment_size=100,
-        exclude_labels=(),  # ("bicyclist", "motorcyclist"),
+        exclude_labels=(),
         include_classes=(),
-        # ("pedestrian", "truck", "bus"),
         dataset_name=dataset_name,
         overwrite_annotation=True,
         keep_samples=False,
     )
-# cvat.import_data(anno_key="manual_samples", launch_app=True)
