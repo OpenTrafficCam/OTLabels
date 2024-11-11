@@ -1,11 +1,37 @@
 """Manage image data using fiftyone"""
 
 import json
+from collections import defaultdict
 from pathlib import Path
 from re import compile
 
 import fiftyone
 import pandas
+
+
+def reorder_samples(samples: dict[str, list]) -> list:
+    """
+    This method reorders the given samples by taking one frame per site before adding
+    the next frame of the site. The site a frame was taken changes in the resulting list
+    between two consecutive frames, if there are frames available of at least two site.
+
+    Args:
+        samples (dict[str, list]): Dictionary of samples per site
+
+    Returns: list of samples
+
+    """
+    dataset_ordered = []
+    sites = sorted(samples.keys())
+    finished_keys: set = set()
+    while sites != sorted(finished_keys):
+        for site in sites:
+            try:
+                element = samples[site].pop()
+                dataset_ordered.append(element)
+            except IndexError:
+                finished_keys.add(site)
+    return dataset_ordered
 
 
 class ImportImages:
@@ -56,7 +82,7 @@ class ImportImages:
         else:
             dataset = fiftyone.Dataset(name=dataset_name, persistent=True)
 
-        samples = []
+        samples = defaultdict(list)
         class_dict = {id: label for label, id in self.classes.items()}
 
         for site in self.config:
@@ -113,10 +139,11 @@ class ImportImages:
                 else:
                     sample["status"] = "imported"
 
-                samples.append(sample)
+                samples[sample["site"]].append(sample)
 
+        dataset_ordered = reorder_samples(samples)
         # Create dataset
-        dataset.add_samples(samples)
+        dataset.add_samples(dataset_ordered)
 
         if launch_app:
             session = fiftyone.launch_app(dataset)

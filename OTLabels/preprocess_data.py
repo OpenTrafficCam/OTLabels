@@ -30,7 +30,7 @@ with open(class_file) as json_file:
     classes = json.load(json_file)
 all_classes = classes.keys()
 
-dataset_prefix = "SVZ_Img"
+dataset_prefix = "SVZ_"
 
 # PreAnnotateImages(
 #     config_file=data_config,
@@ -65,7 +65,7 @@ for key, value in upload_classes.items():
     )
 
     cvat.export_data(
-        annotation_key=f"SVZ_samples_{key}",
+        annotation_key=dataset_name,
         samples=0,
         segment_size=100,
         exclude_labels=(),
