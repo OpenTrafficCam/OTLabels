@@ -11,7 +11,7 @@ class CVAT:
         self,
         url: str,
         security_file: str = "config/security.json",
-        organization_name: str = "OpenTrafficCam",
+        organization_name: str = "platomo",
         project_name: str = "",
         class_file: str = "",
     ):
