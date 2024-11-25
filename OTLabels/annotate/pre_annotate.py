@@ -73,7 +73,7 @@ class PreAnnotateImages:
 
             predictor = self.model
             """
-            This is a temporal fix to inizialize the predictor,
+            This is a temporal fix to initialize the predictor,
             so the output directory for the labels can be edited.
             """
             # TODO: edit output directory in a smarter way
