@@ -5,5 +5,5 @@
     <option name="pathToExecutable" value="/opt/homebrew/bin/black" />
     <option name="sdkName" value="Python 3.10 (OTLabels)" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Remote Python 3.10.12 (sftp://briemla@ws-3090.intra.platomo.de:2222/home/briemla/.virtualenvs/OTLabels/bin/python)" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.11 virtualenv at ~/platomo/git/OpenTrafficCam/OTLabels/venv" project-jdk-type="Python SDK" />
 </project>
