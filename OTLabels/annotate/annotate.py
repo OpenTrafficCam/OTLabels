@@ -1,9 +1,18 @@
 """Export pre-labelled image data to CVAT"""
 
 import json
+from dataclasses import dataclass
 
 import fiftyone
-from fiftyone import ViewField
+from fiftyone import Dataset, ViewField
+from fiftyone.core.annotation import AnnotationResults
+
+
+@dataclass
+class CvatTask:
+    id: int
+    jobs: list[int]
+    cvat_url: str
 
 
 class CVAT:
@@ -50,8 +59,8 @@ class CVAT:
         overwrite_annotation: bool = False,
         keep_samples: bool = True,
         set_status: bool = True,
-    ) -> None:
-        dataset = fiftyone.load_dataset(dataset_name)
+    ) -> list[CvatTask]:
+        dataset: Dataset = fiftyone.load_dataset(dataset_name)
 
         runs = dataset.list_annotation_runs()
 
@@ -85,7 +94,7 @@ class CVAT:
                 print("WARNING: Number of samples is larger than number of images!")
 
         if len(dataset_filtered) > 0:
-            dataset_filtered.annotate(
+            annotation_results: AnnotationResults = dataset_filtered.annotate(
                 anno_key=annotation_key,
                 label_field=label_field,
                 classes=self.classes,
@@ -105,9 +114,14 @@ class CVAT:
 
             if set_status:
                 dataset_filtered = self.set_status(dataset_filtered, "in annotation")
+            return self.convert_to_tasks(annotation_results.job_ids)
 
         else:
             print("ERROR: No images to annotate! Please set your filters correctly.")
+            return []
+
+    def convert_to_tasks(self, job_ids: dict) -> list[CvatTask]:
+        return [CvatTask(task_id, jobs, self.url) for task_id, jobs in job_ids.items()]
 
     # TODO: set status when reimported
     def import_data(
