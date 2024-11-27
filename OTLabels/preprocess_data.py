@@ -1,15 +1,20 @@
 """Preprocess image data for annotation in CVAT"""
 
+from datetime import datetime
 from pathlib import Path
 
 from OTLabels.annotate.annotate import CVAT
-from OTLabels.annotate.otc_classes import OtcClasses
-from OTLabels.dataset.generator import SampleType, generate_dataset_config
+from OTLabels.annotate.otc_classes import OtcClass
+from OTLabels.annotate.pre_annotate import collect_images_in, select_images
+from OTLabels.dataset.generator import (
+    SampleType,
+    generate_dataset_config,
+    generate_image_directories,
+)
 from OTLabels.helpers.classification import load_classes
 from OTLabels.images.import_images import ImportImages
 
 LOCAL_DATA_PATH: Path = Path("/Users/larsbriem/platomo/data/OTLabels/data_mio_svz")
-PROJECT_TYPE = "correct_classification"
 
 CVAT_URL = "https://label.opentrafficcam.org/"
 dataset_prefix = "SVZ"
@@ -39,16 +44,27 @@ all_classes = classes.keys()
 
 # 1. Alle zu annotierenden Bilder sammlen
 samples_per_class = {
-    OtcClasses.DELIVERY_VAN: 500,
-    OtcClasses.TRUCK: 500,
-    OtcClasses.MOTORCYCLIST: 500,
-    OtcClasses.PRIVATE_VAN: 500,
-    OtcClasses.BICYCLIST: 500,
+    OtcClass.DELIVERY_VAN: 500,
+    OtcClass.TRUCK: 500,
+    OtcClass.MOTORCYCLIST: 500,
+    OtcClass.PRIVATE_VAN: 500,
+    OtcClass.BICYCLIST: 500,
 }
 sample_type = SampleType.CORRECT_CLASSIFICATION
-input_path = LOCAL_DATA_PATH / sample_type
-
+input_path = LOCAL_DATA_PATH
+directories = generate_image_directories(
+    base_path=input_path,
+    sample_type=sample_type,
+    classifications=[
+        classification.value for classification in samples_per_class.keys()
+    ],
+)
+images = collect_images_in(directories)
 # 2. Bilder, die zu annotieren sind in einen eigenen Ordner verschieben
+date = datetime.now().strftime("%Y-%m-%d")
+output_path = LOCAL_DATA_PATH / f"annotation-{date}" / sample_type
+selected_images = select_images(images, samples_per_class)
+
 # 1. Assignee und Reviewer definieren
 # 2. 100 Bilder auswählen (Mindestabstand zwischen Bildern einhalten, 60 Frames)
 # 3. Pre-Annotation für diese Bilder durchführen

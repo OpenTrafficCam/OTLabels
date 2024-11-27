@@ -1,7 +1,7 @@
 from enum import StrEnum
 
 
-class OtcClasses(StrEnum):
+class OtcClass(StrEnum):
     TRUCK_WITH_SEMITRAILER = "truck_with_semitrailer"
     DELIVERY_VAN_WITH_TRAILER = "delivery_van_with_trailer"
     DELIVERY_VAN = "delivery_van"

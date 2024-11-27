@@ -1,4 +1,6 @@
 import json
+from collections import defaultdict
+from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 
@@ -17,6 +19,18 @@ DEFAULT_PATH = (
     / "Daten"
     / "data_mio_svz"
 )
+
+
+@dataclass(frozen=True)
+class ImageDirectory:
+    base_path: Path
+    sample_type: SampleType
+    resolution: str
+    classification: str
+
+    @property
+    def path(self) -> Path:
+        return self.base_path / self.sample_type / self.resolution / self.classification
 
 
 def generate(
@@ -50,6 +64,22 @@ def generate_dataset_config(
     return all_datasets
 
 
+def generate_image_directories(
+    classifications: list[str],
+    sample_type: SampleType,
+    base_path: Path = DEFAULT_PATH,
+) -> dict[str, list[ImageDirectory]]:
+    resolutions = ["720x480", "960x540", "1280x720"]
+    all_datasets: dict[str, list[ImageDirectory]] = defaultdict(list)
+    for resolution in resolutions:
+        for classification in classifications:
+            image_directory = create_image_path(
+                base_path, classification, sample_type, resolution
+            )
+            all_datasets[classification].append(image_directory)
+    return all_datasets
+
+
 def load_classifications(class_file: Path) -> list[str]:
     with open(class_file) as json_file:
         classes = json.load(json_file)
@@ -65,7 +95,9 @@ def create_data(
     name = f"{classification}_{resolution}"
     cam_type = f"mioVision_{resolution}"
     comments = f"SVZ-2024-{classification}"
-    image_path = create_image_path(base_path, classification, sample_type, resolution)
+    image_path = create_image_path(
+        base_path, classification, sample_type, resolution
+    ).path
     label_path = image_path / "labels"
     return name, {
         "tags": {
@@ -90,7 +122,7 @@ def create_image_path(
     classification: str,
     sample_type: SampleType,
     resolution: str,
-) -> Path:
+) -> ImageDirectory:
     """
     Create image path for dataset according to the systematically sampled images from
     videos processed for SVZ.
@@ -104,7 +136,12 @@ def create_image_path(
     Returns:
 
     """
-    return base_path / sample_type / resolution / classification
+    return ImageDirectory(
+        base_path=base_path,
+        sample_type=sample_type,
+        resolution=resolution,
+        classification=classification,
+    )
 
 
 if __name__ == "__main__":
