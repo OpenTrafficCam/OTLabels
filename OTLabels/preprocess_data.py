@@ -4,6 +4,8 @@ import itertools
 from datetime import datetime
 from pathlib import Path
 
+import fiftyone
+
 from OTLabels.annotate.annotate import CVAT
 from OTLabels.annotate.otc_classes import OtcClass
 from OTLabels.annotate.pre_annotate import (
@@ -111,14 +113,6 @@ for key, value in upload_classes.items():
         model_file=model_file,
     ).pre_annotate()
 
-    # 1. Assignee und Reviewer definieren
-    users = [
-        User(open_project="Lars Briem", cvat="Lars"),
-        User(open_project="Randy Seng", cvat="Randy"),
-    ]
-    assignees = [(a, b) for a, b in itertools.product(users, repeat=2) if a != b]
-    logger().info(assignees)
-    # 1. Images splitten
     # 1. Daten in fiftyone laden
     importer = ImportImages(
         config=config,
@@ -131,6 +125,28 @@ for key, value in upload_classes.items():
         dataset_name=dataset_name,
         overwrite=True,
     )
+
+    # 1. Assignee und Reviewer definieren
+    users = [
+        User(open_project="Lars Briem", cvat="Lars"),
+        User(open_project="Randy Seng", cvat="Randy"),
+    ]
+    assignees = [(a, b) for a, b in itertools.product(users, repeat=2) if a != b]
+    logger().info(assignees)
+    dataset = fiftyone.load_dataset(dataset_name)
+    # Beispiel: Splitte das Dataset in zwei zufällige Datasets
+    # 70% für Training, 30% für Testen
+    # iterativ 100 rausnehmen und zuweisen.
+    train_view = dataset.take(0.7 * len(dataset), random_seed=42)
+    test_view = dataset.exclude(train_view)
+
+    # Erstelle das Trainings-Dataset und füge die Sichten hinzu
+    train_dataset = fiftyone.Dataset("train_dataset")
+    train_dataset.add_samples(train_view)
+
+    # Erstelle das Test-Dataset und füge die Sichten hinzu
+    test_dataset = fiftyone.Dataset("test_dataset")
+    test_dataset.add_samples(test_view)
     # 3. Task und Job in CVAT anlegen
     tasks = cvat.export_data(
         annotation_key=dataset_name,
