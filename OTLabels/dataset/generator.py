@@ -30,7 +30,10 @@ class ImageDirectory:
 
     @property
     def path(self) -> Path:
-        return self.base_path / self.sample_type / self.resolution / self.classification
+        return self.relative_to(self.base_path)
+
+    def relative_to(self, path):
+        return path / self.sample_type / self.resolution / self.classification
 
 
 def generate(
