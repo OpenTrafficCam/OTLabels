@@ -7,7 +7,8 @@ from re import compile
 
 import fiftyone
 import pandas
-from helpers.classification import load_classes
+
+from OTLabels.helpers.classification import load_classes
 
 
 def reorder_samples(samples: dict[str, list]) -> list:

@@ -2,10 +2,10 @@
 
 from pathlib import Path
 
-from helpers.classification import load_classes
-
 from OTLabels.annotate.annotate import CVAT
-from OTLabels.dataset.generator import generate_dataset_config
+from OTLabels.annotate.otc_classes import OtcClasses
+from OTLabels.dataset.generator import SampleType, generate_dataset_config
+from OTLabels.helpers.classification import load_classes
 from OTLabels.images.import_images import ImportImages
 
 LOCAL_DATA_PATH: Path = Path("/Users/larsbriem/platomo/data/OTLabels/data_mio_svz")
@@ -13,7 +13,7 @@ PROJECT_TYPE = "correct_classification"
 
 CVAT_URL = "https://label.opentrafficcam.org/"
 dataset_prefix = "SVZ"
-project_name = f"{dataset_prefix}-{PROJECT_TYPE}"
+project_name = f"{dataset_prefix}-{SampleType.CORRECT_CLASSIFICATION}"
 
 data_config = "data/image_data/training_data_svz_all_separate_labels.json"
 data_config = "data/image_data/training_data_svz.json"
@@ -37,8 +37,17 @@ model_file = remote_model_file
 classes = load_classes(class_file)
 all_classes = classes.keys()
 
-# TODO
-# 1. Alle Bilder sammlen
+# 1. Alle zu annotierenden Bilder sammlen
+samples_per_class = {
+    OtcClasses.DELIVERY_VAN: 500,
+    OtcClasses.TRUCK: 500,
+    OtcClasses.MOTORCYCLIST: 500,
+    OtcClasses.PRIVATE_VAN: 500,
+    OtcClasses.BICYCLIST: 500,
+}
+sample_type = SampleType.CORRECT_CLASSIFICATION
+input_path = LOCAL_DATA_PATH / sample_type
+
 # 2. Bilder, die zu annotieren sind in einen eigenen Ordner verschieben
 # 1. Assignee und Reviewer definieren
 # 2. 100 Bilder auswählen (Mindestabstand zwischen Bildern einhalten, 60 Frames)
@@ -66,7 +75,7 @@ cvat = CVAT(
 for key, value in upload_classes.items():
     config = generate_dataset_config(
         classifications=[key],
-        project_type=PROJECT_TYPE,
+        project_type=SampleType.CORRECT_CLASSIFICATION,
         base_path=LOCAL_DATA_PATH,
     )
     dataset_name = f"{dataset_prefix}_{key}"
