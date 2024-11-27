@@ -21,11 +21,11 @@ DEFAULT_PATH = (
 
 def generate(
     output_file: Path,
-    project_type: SampleType,
+    sample_type: SampleType,
     class_file: Path = Path("OTLabels/config/classes_OTC.json"),
 ) -> None:
     classifications = load_classifications(class_file)
-    all_datasets = generate_dataset_config(classifications, project_type=project_type)
+    all_datasets = generate_dataset_config(classifications, sample_type=sample_type)
 
     with open(output_file, mode="w") as output:
         json.dump(all_datasets, output, indent=2)
@@ -33,7 +33,7 @@ def generate(
 
 def generate_dataset_config(
     classifications: list[str],
-    project_type: SampleType,
+    sample_type: SampleType,
     base_path: Path = DEFAULT_PATH,
 ) -> dict:
     resolutions = ["720x480", "960x540", "1280x720"]
@@ -43,7 +43,7 @@ def generate_dataset_config(
             key, value = create_data(
                 classification=classification,
                 resolution=resolution,
-                project_type=project_type,
+                sample_type=sample_type,
                 base_path=base_path,
             )
             all_datasets[key] = value
@@ -59,13 +59,13 @@ def load_classifications(class_file: Path) -> list[str]:
 def create_data(
     classification: str,
     resolution: str,
-    project_type: SampleType,
+    sample_type: SampleType,
     base_path: Path,
 ) -> tuple[str, dict]:
     name = f"{classification}_{resolution}"
     cam_type = f"mioVision_{resolution}"
     comments = f"SVZ-2024-{classification}"
-    image_path = create_image_path(base_path, classification, project_type, resolution)
+    image_path = create_image_path(base_path, classification, sample_type, resolution)
     label_path = image_path / "labels"
     return name, {
         "tags": {

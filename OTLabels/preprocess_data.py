@@ -75,7 +75,7 @@ cvat = CVAT(
 for key, value in upload_classes.items():
     config = generate_dataset_config(
         classifications=[key],
-        project_type=SampleType.CORRECT_CLASSIFICATION,
+        sample_type=SampleType.CORRECT_CLASSIFICATION,
         base_path=LOCAL_DATA_PATH,
     )
     dataset_name = f"{dataset_prefix}_{key}"
