@@ -6,6 +6,9 @@ from pathlib import Path
 
 import fire
 
+from OTLabels.annotate.otc_classes import OtcClass
+from OTLabels.helpers.classification import load_classes
+
 
 class SampleType(StrEnum):
     CORRECT_CLASSIFICATION = "correct_classification"
@@ -26,14 +29,14 @@ class ImageDirectory:
     base_path: Path
     sample_type: SampleType
     resolution: str
-    classification: str
+    classification: OtcClass
 
     @property
     def path(self) -> Path:
         return self.relative_to(self.base_path)
 
     def relative_to(self, path):
-        return path / self.sample_type / self.resolution / self.classification
+        return path / self.sample_type / self.resolution / self.classification.value
 
 
 def generate(
@@ -49,7 +52,7 @@ def generate(
 
 
 def generate_dataset_config(
-    classifications: list[str],
+    classifications: list[OtcClass],
     sample_type: SampleType,
     base_path: Path = DEFAULT_PATH,
 ) -> dict:
@@ -68,12 +71,12 @@ def generate_dataset_config(
 
 
 def generate_image_directories(
-    classifications: list[str],
+    classifications: list[OtcClass],
     sample_type: SampleType,
     base_path: Path = DEFAULT_PATH,
-) -> dict[str, list[ImageDirectory]]:
+) -> dict[OtcClass, list[ImageDirectory]]:
     resolutions = ["720x480", "960x540", "1280x720"]
-    all_datasets: dict[str, list[ImageDirectory]] = defaultdict(list)
+    all_datasets: dict[OtcClass, list[ImageDirectory]] = defaultdict(list)
     for resolution in resolutions:
         for classification in classifications:
             image_directory = create_image_path(
@@ -83,14 +86,13 @@ def generate_image_directories(
     return all_datasets
 
 
-def load_classifications(class_file: Path) -> list[str]:
-    with open(class_file) as json_file:
-        classes = json.load(json_file)
-        return [label for label in classes.keys()]
+def load_classifications(class_file: Path) -> list[OtcClass]:
+    classes = load_classes(class_file)
+    return [label for label in classes.keys()]
 
 
 def create_data(
-    classification: str,
+    classification: OtcClass,
     resolution: str,
     sample_type: SampleType,
     base_path: Path,
@@ -122,7 +124,7 @@ def create_data(
 
 def create_image_path(
     base_path: Path,
-    classification: str,
+    classification: OtcClass,
     sample_type: SampleType,
     resolution: str,
 ) -> ImageDirectory:

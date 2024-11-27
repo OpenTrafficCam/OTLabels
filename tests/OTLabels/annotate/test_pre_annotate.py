@@ -1,13 +1,21 @@
 from pathlib import Path
 
 import pytest
-from dataset.generator import ImageDirectory, SampleType
 
+from OTLabels.annotate.otc_classes import OtcClass
 from OTLabels.annotate.pre_annotate import (
     Image,
     PreAnnotateImages,
     drop_images_too_close,
     reorder_samples,
+)
+from OTLabels.dataset.generator import ImageDirectory, SampleType
+
+DEFAULT_IMAGE_DIRECTORY = ImageDirectory(
+    base_path=Path(""),
+    sample_type=SampleType.CORRECT_CLASSIFICATION,
+    resolution="",
+    classification=OtcClass.CAR,
 )
 
 
@@ -45,33 +53,46 @@ class TestYOLOv8:
 class Site:
 
     def __init__(self, name: str) -> None:
-        self.image_0 = self.create_image(0, name)
-        self.image_1 = self.create_image(1, name)
-        self.image_2 = self.create_image(2, name)
-        self.image_3 = self.create_image(3, name)
-        self.image_4 = self.create_image(4, name)
-        self.image_5 = self.create_image(5, name)
-        self.image_6 = self.create_image(6, name)
+        self.image_0 = create_image(0, name)
+        self.image_1 = create_image(1, name)
+        self.image_2 = create_image(2, name)
+        self.image_3 = create_image(3, name)
+        self.image_4 = create_image(4, name)
+        self.image_5 = create_image(5, name)
+        self.image_6 = create_image(6, name)
 
-    @staticmethod
-    def create_image(frame, site):
-        directory = ImageDirectory(
-            base_path=Path(""),
-            sample_type=SampleType.CORRECT_CLASSIFICATION,
-            resolution="",
-            classification="",
-        )
-        return Image(
-            image_directory=directory,
-            image_path=Path(""),
-            site=site,
-            cam_type="Standard",
-            frame=frame,
-        )
+
+def create_image(frame: int, site: str, directory=DEFAULT_IMAGE_DIRECTORY):
+    return Image(
+        image_directory=directory,
+        image_path=directory.path / f"{site}_image_{frame}.png",
+        site=site,
+        cam_type="Standard",
+        frame=frame,
+    )
 
 
 SITE_0 = Site("site-0")
 SITE_1 = Site("site-1")
+
+
+class TestImage:
+    def test_move(self, test_data_tmp_dir: Path) -> None:
+        directory = ImageDirectory(
+            base_path=test_data_tmp_dir / "base",
+            sample_type=SampleType.CORRECT_CLASSIFICATION,
+            resolution="720x480",
+            classification=OtcClass.CAR,
+        )
+        image = create_image(directory=directory, site="site-0", frame=0)
+        image.image_path.parent.mkdir(parents=True, exist_ok=True)
+        image.image_path.touch()
+
+        assert image.image_path.exists()
+        output_folder = test_data_tmp_dir / "output"
+        image.move(to=output_folder)
+        expected_output = directory.relative_to(output_folder) / image.image_path.name
+        assert expected_output.exists()
 
 
 @pytest.mark.parametrize(

@@ -5,7 +5,7 @@ from pathlib import Path
 
 from OTLabels.annotate.annotate import CVAT
 from OTLabels.annotate.otc_classes import OtcClass
-from OTLabels.annotate.pre_annotate import collect_images_in, select_images
+from OTLabels.annotate.pre_annotate import collect_images_in, move_images, select_images
 from OTLabels.dataset.generator import (
     SampleType,
     generate_dataset_config,
@@ -43,7 +43,7 @@ classes = load_classes(class_file)
 all_classes = classes.keys()
 
 # 1. Alle zu annotierenden Bilder sammlen
-samples_per_class = {
+samples_per_class: dict[OtcClass, int] = {
     OtcClass.DELIVERY_VAN: 500,
     OtcClass.TRUCK: 500,
     OtcClass.MOTORCYCLIST: 500,
@@ -55,16 +55,14 @@ input_path = LOCAL_DATA_PATH
 directories = generate_image_directories(
     base_path=input_path,
     sample_type=sample_type,
-    classifications=[
-        classification.value for classification in samples_per_class.keys()
-    ],
+    classifications=list(samples_per_class.keys()),
 )
 images = collect_images_in(directories)
 # 2. Bilder, die zu annotieren sind in einen eigenen Ordner verschieben
 date = datetime.now().strftime("%Y-%m-%d")
 output_path = LOCAL_DATA_PATH / f"annotation-{date}" / sample_type
 selected_images = select_images(images, samples_per_class)
-
+move_images(selected_images, output_path)
 # 1. Assignee und Reviewer definieren
 # 2. 100 Bilder auswählen (Mindestabstand zwischen Bildern einhalten, 60 Frames)
 # 3. Pre-Annotation für diese Bilder durchführen
@@ -79,7 +77,7 @@ selected_images = select_images(images, samples_per_class)
 #     model_file=model_file,
 # ).pre_annotate()
 
-debug_classes = {"bicyclist": 1}
+debug_classes = {OtcClass.BICYCLIST: 1}
 upload_classes = classes
 upload_classes = debug_classes
 cvat = CVAT(

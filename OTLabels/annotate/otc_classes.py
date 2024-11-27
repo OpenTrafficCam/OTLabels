@@ -20,3 +20,10 @@ class OtcClass(StrEnum):
     BICYCLIST = "bicyclist"
     PEDESTRIAN = "pedestrian"
     OTHER = "other"
+
+    @staticmethod
+    def from_string(string: str) -> "OtcClass":
+        for value in OtcClass:
+            if value == string.lower():
+                return value
+        raise ValueError(f"{string} is not a valid OTC class")

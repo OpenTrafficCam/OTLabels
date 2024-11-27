@@ -1,8 +1,7 @@
 from pathlib import Path
 
-from dataset.generator import SampleType
-
-from OTLabels.dataset.generator import ImageDirectory
+from OTLabels.annotate.otc_classes import OtcClass
+from OTLabels.dataset.generator import ImageDirectory, SampleType
 
 
 class TestImageDirectory:
@@ -10,7 +9,7 @@ class TestImageDirectory:
         base_path = Path("base_path")
         sample_type = SampleType.CORRECT_CLASSIFICATION
         resolution = "800x600"
-        classification = "car"
+        classification = OtcClass.CAR
         directory = ImageDirectory(
             base_path=base_path,
             sample_type=sample_type,

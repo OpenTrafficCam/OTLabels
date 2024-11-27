@@ -3,6 +3,7 @@
 # import modules
 import json
 import re
+import shutil
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -10,11 +11,12 @@ from re import Pattern
 from typing import Optional
 
 import pandas
-from annotate.otc_classes import OtcClass
-from dataset.generator import ImageDirectory
 from pandas import DataFrame
 from tqdm import tqdm
 from ultralytics import YOLO
+
+from OTLabels.annotate.otc_classes import OtcClass
+from OTLabels.dataset.generator import ImageDirectory
 
 LABEL_GLOB: str = "*.txt"
 IMAGE_GLOB: str = "*.png"
@@ -40,10 +42,15 @@ class Image:
     cam_type: str
     frame: int
 
+    def move(self, to: Path) -> None:
+        target = self.image_directory.relative_to(to) / self.image_path.name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(self.image_path), str(target))
+
 
 def collect_images_in(
-    directories: dict[str, list[ImageDirectory]]
-) -> dict[str, list[Image]]:
+    directories: dict[OtcClass, list[ImageDirectory]]
+) -> dict[OtcClass, list[Image]]:
     """
     Collects images from specified directories and categorizes them based on the given
     classification.
@@ -163,6 +170,12 @@ def reorder_samples(images: list[Image]) -> list[Image]:
             except IndexError:
                 finished_sites.add(site)
     return dataset_ordered
+
+
+def move_images(images: dict[OtcClass, list[Image]], output_path: Path) -> None:
+    for image_list in images.values():
+        for image in image_list:
+            image.move(to=output_path)
 
 
 class PreAnnotateImages:
