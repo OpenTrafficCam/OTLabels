@@ -47,6 +47,9 @@ class Image:
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(str(self.image_path), str(target))
 
+    def __str__(self) -> str:
+        return str(self.image_path)
+
 
 def collect_images_in(
     directories: dict[OtcClass, list[ImageDirectory]]
@@ -181,18 +184,24 @@ def move_images(images: dict[OtcClass, list[Image]], output_path: Path) -> None:
 class PreAnnotateImages:
     def __init__(
         self,
-        config_file: str,
+        config_file: str | None = None,
+        config: dict | None = None,
         class_file: str = "",
         filter_sites: list = [],
         model_file: str = "yolov8n.pt",
     ) -> None:
         self.model = YOLO(model_file, task="detect")
 
-        with open(config_file) as json_file:
-            self.config = json.load(json_file)
+        if config:
+            self.config = config
+        else:
+            if config_file is None:
+                raise FileNotFoundError()
+            with open(config_file) as json_file:
+                self.config = json.load(json_file)
 
-            if len(filter_sites) > 0:
-                self.config = self.config[filter_sites]
+        if len(filter_sites) > 0:
+            self.config = self.config[filter_sites]
 
         if class_file != "":
             with open(class_file) as json_file:
@@ -260,3 +269,9 @@ class PreAnnotateImages:
                     self._filter_classes(site, label_dir)
             except StopIteration:
                 continue
+
+
+@dataclass(frozen=True)
+class User:
+    open_project: str
+    cvat: str

@@ -38,6 +38,9 @@ class ImageDirectory:
     def relative_to(self, path):
         return path / self.sample_type / self.resolution / self.classification.value
 
+    def __str__(self) -> str:
+        return str(self.path)
+
 
 def generate(
     output_file: Path,
