@@ -1,7 +1,8 @@
 """Preprocess image data for annotation in CVAT"""
 
-import json
 from pathlib import Path
+
+from helpers.classification import load_classes
 
 from OTLabels.annotate.annotate import CVAT
 from OTLabels.dataset.generator import generate_dataset_config
@@ -31,20 +32,21 @@ remote_model_file = (
     "/mioVision/OTCv1-2_yolov8l_mio_batch3_OTC_v0-1-4_fp16.mlpackage"
 )
 
+model_file = remote_model_file
+
+classes = load_classes(class_file)
+all_classes = classes.keys()
+
 # TODO
+# 1. Alle Bilder sammlen
+# 2. Bilder, die zu annotieren sind in einen eigenen Ordner verschieben
 # 1. Assignee und Reviewer definieren
 # 2. 100 Bilder auswählen (Mindestabstand zwischen Bildern einhalten, 60 Frames)
 # 3. Pre-Annotation für diese Bilder durchführen
 # 3. Task und Job in CVAT anlegen
-# 4. Issue in OP anlegen (Enthält Link zu CVAT Task und Job)
+# 4. Issue in OP anlegen (Enthält Link zu CVAT Task und Job, Bearbeiterhandling in OP)
 #
 
-
-model_file = remote_model_file
-classes = {}
-with open(class_file) as json_file:
-    classes = json.load(json_file)
-all_classes = classes.keys()
 
 # PreAnnotateImages(
 #     config_file=data_config,

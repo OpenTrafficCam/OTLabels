@@ -7,6 +7,7 @@ from re import compile
 
 import fiftyone
 import pandas
+from helpers.classification import load_classes
 
 
 def reorder_samples(samples: dict[str, list]) -> list:
@@ -59,8 +60,7 @@ class ImportImages:
             self.config = self.config[filter_sites]
 
         if class_file != "":
-            with open(class_file) as json_file:
-                self.classes = json.load(json_file)
+            self.classes = load_classes(class_file)
 
     def initial_import(
         self,
