@@ -127,6 +127,7 @@ for key, value in upload_classes.items():
     )
 
     # 1. Assignee und Reviewer definieren
+    # Move usernames into config file (sensitive data)
     users = [
         User(open_project="Lars Briem", cvat="Lars"),
         User(open_project="Randy Seng", cvat="Randy"),
