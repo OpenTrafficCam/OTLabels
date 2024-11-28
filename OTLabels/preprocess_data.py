@@ -23,6 +23,7 @@ from OTLabels.dataset.generator import (
 from OTLabels.helpers.classification import load_classes
 from OTLabels.images.import_images import ImportImages
 from OTLabels.logger.logger import logger, setup_logger
+from OTLabels.tasks.openproject import CreateWorkPackages
 
 setup_logger()
 LOCAL_DATA_PATH: Path = Path("/Users/larsbriem/platomo/data/OTLabels/data_mio_svz")
@@ -170,7 +171,8 @@ for key, value in upload_classes.items():
             # 4. Issue in OP anlegen
             #   (Enthält Link zu CVAT Task und Job, Bearbeiterhandling in OP)
 
-            print(tasks)
+            CreateWorkPackages().create_open_project_tasks(tasks, assignee, reviewer)
+
             remaining_dataset.delete_samples(to_assign)
             if len(remaining_dataset) == 0:
                 break
