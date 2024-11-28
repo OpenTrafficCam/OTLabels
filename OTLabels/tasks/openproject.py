@@ -6,9 +6,9 @@ from OTLabels.logger.logger import logger
 
 
 class CreateWorkPackages:
-    def __init__(self) -> None:
+    def __init__(self, project_id: int) -> None:
         self._openproject = OpenProject(OPENPROJECT_API_KEY)
-        self._project_id = 37
+        self._project_id = project_id
 
     def create_open_project_tasks(
         self, tasks: list[CvatTask], assignee: User, reviewer: User

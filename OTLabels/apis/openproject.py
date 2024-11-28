@@ -146,7 +146,8 @@ class OpenProject:
         )
         if response.status_code != 200:
             raise IOError("Could not get Assignees")
-        for user_id in response.json()["_embedded"]["elements"]:
-            if user_id["_links"]["self"]["title"] == user:
-                return user_id["id"]
+        elements = response.json()["_embedded"]["elements"]
+        for element in elements:
+            if element["_type"] == "User" and element["login"] == user:
+                return element["id"]
         raise ValueError("User not found")

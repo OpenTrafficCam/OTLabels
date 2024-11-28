@@ -14,6 +14,12 @@ class CvatTask:
     jobs: list[int]
     cvat_url: str
 
+    def job_urls(self) -> list[str]:
+        return [
+            f"https://label.opentrafficcam.org/tasks/{self.id}/jobs/{job}"
+            for job in self.jobs
+        ]
+
 
 class CVAT:
     def __init__(

@@ -28,6 +28,7 @@ from OTLabels.tasks.openproject import CreateWorkPackages
 setup_logger()
 LOCAL_DATA_PATH: Path = Path("/Users/larsbriem/platomo/data/OTLabels/data_mio_svz")
 
+OTLABELS_PROJECT_ID = 24
 CVAT_URL = "https://label.opentrafficcam.org/"
 dataset_prefix = "SVZ"
 project_name = f"{dataset_prefix}-{SampleType.CORRECT_CLASSIFICATION}"
@@ -146,9 +147,7 @@ for key, value in upload_classes.items():
         for assignee, reviewer in assignees:
             to_assign = remaining_dataset.take(job_size, seed=42)
 
-            to_assign_name = (
-                f"{dataset_name}_{assignee.open_project}_{reviewer.open_project}"
-            )
+            to_assign_name = f"{dataset_name}_{assignee.cvat}_{reviewer.cvat}"
             to_assign_name = to_assign_name.replace(" ", "_")
             to_assign_dataset = fiftyone.Dataset(to_assign_name)
             to_assign_dataset.add_samples(to_assign)
@@ -171,7 +170,9 @@ for key, value in upload_classes.items():
             # 4. Issue in OP anlegen
             #   (Enthält Link zu CVAT Task und Job, Bearbeiterhandling in OP)
 
-            CreateWorkPackages().create_open_project_tasks(tasks, assignee, reviewer)
+            CreateWorkPackages(
+                project_id=OTLABELS_PROJECT_ID
+            ).create_open_project_tasks(tasks, assignee, reviewer)
 
             remaining_dataset.delete_samples(to_assign)
             if len(remaining_dataset) == 0:
