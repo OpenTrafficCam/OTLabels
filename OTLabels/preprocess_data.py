@@ -10,6 +10,7 @@ from OTLabels.annotate.annotate import CVAT
 from OTLabels.annotate.otc_classes import OtcClass
 from OTLabels.annotate.pre_annotate import (
     PreAnnotateImages,
+    User,
     collect_images_in,
     move_images,
     select_images,
@@ -101,40 +102,14 @@ def prepare_images(
 
 prepare_images(input_path, sample_type, annotation_directory)
 
-for key, value in upload_classes.items():
-    config = generate_dataset_config(
-        classifications=[key],
-        sample_type=SampleType.CORRECT_CLASSIFICATION,
-        base_path=annotation_directory,
-    )
-    old_key = f"{dataset_prefix}-{key}"
-    if fiftyone.dataset_exists(old_key):
-        fiftyone.delete_dataset(old_key)
-    dataset_name = f"{dataset_prefix}_{key}"
 
-    # 3. Pre-Annotation für diese Bilder durchführen
-    PreAnnotateImages(
-        config=config,
-        class_file=class_file,
-        model_file=model_file,
-    ).pre_annotate()
-
-    # 1. Daten in fiftyone laden
-    importer = ImportImages(
-        config=config,
-        class_file=class_file,
-        otc_pipeline_import=True,
-    )
-    importer.initial_import(
-        import_labels=True,
-        launch_app=False,
-        dataset_name=dataset_name,
-        overwrite=True,
-    )
-
-    # 1. Assignee und Reviewer definieren
+def generate_user_pairs(users: list[User]) -> list[tuple[User, User]]:
     assignees = [(a, b) for a, b in itertools.product(users, repeat=2) if a != b]
     logger().info(assignees)
+    return assignees
+
+
+def create_jobs(dataset_name: str, assignees: list[tuple[User, User]]) -> None:
     dataset = fiftyone.load_dataset(dataset_name)
     remaining_dataset = fiftyone.Dataset(f"{dataset_name}_remaining")
     remaining_dataset.add_samples(dataset)
@@ -173,3 +148,39 @@ for key, value in upload_classes.items():
             remaining_dataset.delete_samples(to_assign)
             if len(remaining_dataset) == 0:
                 break
+
+
+for key, value in upload_classes.items():
+    config = generate_dataset_config(
+        classifications=[key],
+        sample_type=SampleType.CORRECT_CLASSIFICATION,
+        base_path=annotation_directory,
+    )
+    old_key = f"{dataset_prefix}-{key}"
+    if fiftyone.dataset_exists(old_key):
+        fiftyone.delete_dataset(old_key)
+    dataset_name = f"{dataset_prefix}_{key}"
+
+    # 3. Pre-Annotation für diese Bilder durchführen
+    PreAnnotateImages(
+        config=config,
+        class_file=class_file,
+        model_file=model_file,
+    ).pre_annotate()
+
+    # 1. Daten in fiftyone laden
+    importer = ImportImages(
+        config=config,
+        class_file=class_file,
+        otc_pipeline_import=True,
+    )
+    importer.initial_import(
+        import_labels=True,
+        launch_app=False,
+        dataset_name=dataset_name,
+        overwrite=True,
+    )
+
+    # 1. Assignee und Reviewer definieren
+    assignees = generate_user_pairs(users)
+    create_jobs(dataset_name, assignees)
