@@ -129,40 +129,44 @@ for key, value in upload_classes.items():
     # 1. Assignee und Reviewer definieren
     # Move usernames into config file (sensitive data)
     users = [
-        User(open_project="Lars Briem", cvat="Lars"),
-        User(open_project="Randy Seng", cvat="Randy"),
+        User(open_project="Lars Briem", cvat="lars"),
+        User(open_project="Randy Seng", cvat="randy"),
     ]
     assignees = [(a, b) for a, b in itertools.product(users, repeat=2) if a != b]
     logger().info(assignees)
     dataset = fiftyone.load_dataset(dataset_name)
-    # Beispiel: Splitte das Dataset in zwei zufällige Datasets
-    # 70% für Training, 30% für Testen
+    remaining_dataset = fiftyone.Dataset("remaining")
+    remaining_dataset.add_samples(dataset)
     # iterativ 100 rausnehmen und zuweisen.
-    train_view = dataset.take(0.7 * len(dataset), random_seed=42)
-    test_view = dataset.exclude(train_view)
+    while len(remaining_dataset) > 0:
+        for assignee, reviewer in assignees:
+            to_assign = remaining_dataset.take(job_size, seed=42)
 
-    # Erstelle das Trainings-Dataset und füge die Sichten hinzu
-    train_dataset = fiftyone.Dataset("train_dataset")
-    train_dataset.add_samples(train_view)
+            to_assign_name = (
+                f"{dataset_name}_{assignee.open_project}_{reviewer.open_project}"
+            )
+            to_assign_dataset = fiftyone.Dataset(to_assign_name)
+            to_assign_dataset.add_samples(to_assign)
+            to_assign_dataset.sort_by("site")
 
-    # Erstelle das Test-Dataset und füge die Sichten hinzu
-    test_dataset = fiftyone.Dataset("test_dataset")
-    test_dataset.add_samples(test_view)
-    # 3. Task und Job in CVAT anlegen
-    tasks = cvat.export_data(
-        annotation_key=dataset_name,
-        task_assignee="",
-        job_assignees=[""],
-        samples=0,
-        task_size=job_size,
-        segment_size=job_size,
-        exclude_labels=(),
-        include_classes=(),
-        dataset_name=dataset_name,
-        overwrite_annotation=True,
-        keep_samples=False,
-    )
-    # 4. Issue in OP anlegen
-    #   (Enthält Link zu CVAT Task und Job, Bearbeiterhandling in OP)
+            # 3. Task und Job in CVAT anlegen
+            tasks = cvat.export_data(
+                annotation_key=to_assign_name,
+                task_assignee=assignee.cvat,
+                job_assignees=[assignee.cvat],
+                samples=0,
+                task_size=job_size,
+                segment_size=job_size,
+                exclude_labels=(),
+                include_classes=(),
+                dataset_name=to_assign_name,
+                overwrite_annotation=True,
+                keep_samples=False,
+            )
+            # 4. Issue in OP anlegen
+            #   (Enthält Link zu CVAT Task und Job, Bearbeiterhandling in OP)
 
-    print(tasks)
+            print(tasks)
+            remaining_dataset.delete_samples(to_assign)
+            if len(remaining_dataset) == 0:
+                break
