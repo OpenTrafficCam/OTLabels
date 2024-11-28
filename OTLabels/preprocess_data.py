@@ -10,7 +10,6 @@ from OTLabels.annotate.annotate import CVAT
 from OTLabels.annotate.otc_classes import OtcClass
 from OTLabels.annotate.pre_annotate import (
     PreAnnotateImages,
-    User,
     collect_images_in,
     move_images,
     select_images,
@@ -24,6 +23,7 @@ from OTLabels.helpers.classification import load_classes
 from OTLabels.images.import_images import ImportImages
 from OTLabels.logger.logger import logger, setup_logger
 from OTLabels.tasks.openproject import CreateWorkPackages
+from OTLabels.users import load_users
 
 setup_logger()
 LOCAL_DATA_PATH: Path = Path("/Users/larsbriem/platomo/data/OTLabels/data_mio_svz")
@@ -52,6 +52,7 @@ remote_model_file = (
 
 model_file = remote_model_file
 
+users = load_users()
 classes = load_classes(class_file)
 all_classes = classes.keys()
 job_size = 5
@@ -132,11 +133,6 @@ for key, value in upload_classes.items():
     )
 
     # 1. Assignee und Reviewer definieren
-    # Move usernames into config file (sensitive data)
-    users = [
-        User(open_project="Lars Briem", cvat="lars"),
-        User(open_project="Randy Seng", cvat="randy"),
-    ]
     assignees = [(a, b) for a, b in itertools.product(users, repeat=2) if a != b]
     logger().info(assignees)
     dataset = fiftyone.load_dataset(dataset_name)
