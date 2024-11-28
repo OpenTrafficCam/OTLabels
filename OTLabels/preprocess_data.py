@@ -53,9 +53,9 @@ model_file = remote_model_file
 classes = load_classes(class_file)
 all_classes = classes.keys()
 job_size = 5
-debug_classes = {OtcClass.BICYCLIST: 1}
+debug_classes = {OtcClass.MOTORCYCLIST: 1}
 upload_classes = classes
-upload_classes = debug_classes
+# upload_classes = debug_classes
 cvat = CVAT(
     url=CVAT_URL,
     project_name=project_name,
@@ -96,7 +96,7 @@ def prepare_images(
     move_images(selected_images, annotation_directory)
 
 
-# prepare_images(input_path, sample_type, annotation_directory)
+prepare_images(input_path, sample_type, annotation_directory)
 
 for key, value in upload_classes.items():
     config = generate_dataset_config(
@@ -104,6 +104,9 @@ for key, value in upload_classes.items():
         sample_type=SampleType.CORRECT_CLASSIFICATION,
         base_path=annotation_directory,
     )
+    old_key = f"{dataset_prefix}-{key}"
+    if fiftyone.dataset_exists(old_key):
+        fiftyone.delete_dataset(old_key)
     dataset_name = f"{dataset_prefix}_{key}"
 
     # 3. Pre-Annotation für diese Bilder durchführen
@@ -135,7 +138,7 @@ for key, value in upload_classes.items():
     assignees = [(a, b) for a, b in itertools.product(users, repeat=2) if a != b]
     logger().info(assignees)
     dataset = fiftyone.load_dataset(dataset_name)
-    remaining_dataset = fiftyone.Dataset("remaining")
+    remaining_dataset = fiftyone.Dataset(f"{dataset_name}_remaining")
     remaining_dataset.add_samples(dataset)
     # iterativ 100 rausnehmen und zuweisen.
     while len(remaining_dataset) > 0:
@@ -145,6 +148,7 @@ for key, value in upload_classes.items():
             to_assign_name = (
                 f"{dataset_name}_{assignee.open_project}_{reviewer.open_project}"
             )
+            to_assign_name = to_assign_name.replace(" ", "_")
             to_assign_dataset = fiftyone.Dataset(to_assign_name)
             to_assign_dataset.add_samples(to_assign)
             to_assign_dataset.sort_by("site")
