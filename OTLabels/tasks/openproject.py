@@ -15,10 +15,51 @@ class CreateWorkPackages:
     ) -> None:
         logger().info("Creating OpenProject tasks")
         logger().info(tasks)
-        self._openproject.create_task(
-            title="Test",
-            content="Content",
-            assignee=assignee,
-            reviewer=reviewer,
-            project_id=self._project_id,
-        )
+        for task in tasks:
+            for job in task.jobs:
+                self._openproject.create_task(
+                    title=f"TEST!!!! --- Annotate job {job} in task {task.id}",
+                    content=self._create_content(task),
+                    assignee=assignee,
+                    reviewer=reviewer,
+                    project_id=self._project_id,
+                )
+
+    def _create_content(self, task: CvatTask) -> str:
+        concatenate_urls = "\n".join(task.job_urls())
+        return f"""
+# Link
+
+{concatenate_urls}
+
+# Status
+
+*   [ ] Annotation
+*   [ ] Review
+*   [ ] Supervised
+*   [ ] Completed
+
+# Kommentare
+
+# Anleitung
+
+1. Durchgehen aller vorbeschrifteten Labels auf der rechten Seite
+2. Prüfen und Löschen falsch positiver Labels (wenn es kein Objekt gibt)
+3. Prüfen und löschen Sie doppelte Labels für dasselbe Objekt
+4. Prüfen und korrigieren der Detektionsklasse für die Objekte
+6. Prüfen und korrigieren Sie die Position der 2D-Boxen des Objekts
+7. Prüfen Sie, ob es Objekte aus den Detektionsklassen gibt, die noch nicht beschriftet
+sind, zeichnen Sie neue 2D-Kästchen und annotieren Sie die Detektionsklasse
+
+# Hinweise
+
+Die aktuelle Übersicht über den Ablauf und die Randfälle ist hier zu finden:
+https://hedgedoc.intra.platomo.de/0-fgOfIVRSuDK3VMShBFng
+
+Die allgmeine Anleitung zum Annotieren ist hier zu finden:
+/Volumes/platomo/Projekte/001 OpenTrafficCam_live/work/OTLabels/Labelling in CVAT.pdf
+
+Die aktuelle Definition der Klassen ist hier zu finden:
+/Volumes/platomo/Produkte/OpenTrafficCam/OTLabels/Klassen_Ground_Truth_V1_2.pdf
+
+"""
