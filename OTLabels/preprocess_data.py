@@ -1,8 +1,10 @@
 """Preprocess image data for annotation in CVAT"""
 
 import itertools
+import random
 from datetime import datetime
 from pathlib import Path
+from typing import Iterator
 
 import fiftyone
 
@@ -52,6 +54,7 @@ remote_model_file = (
 )
 
 model_file = remote_model_file
+model_file = local_model_file
 
 users = load_users()
 classes = load_classes(class_file)
@@ -105,11 +108,12 @@ prepare_images(input_path, sample_type, annotation_directory)
 
 def generate_user_pairs(users: list[User]) -> list[tuple[User, User]]:
     assignees = [(a, b) for a, b in itertools.product(users, repeat=2) if a != b]
+    random.shuffle(assignees)
     logger().info(assignees)
     return assignees
 
 
-def create_jobs(dataset_name: str, assignees: list[tuple[User, User]]) -> None:
+def create_jobs(dataset_name: str, assignees: Iterator[tuple[User, User]]) -> None:
     dataset = fiftyone.load_dataset(dataset_name)
     remaining_dataset = fiftyone.Dataset(f"{dataset_name}_remaining")
     remaining_dataset.add_samples(dataset)
@@ -150,6 +154,9 @@ def create_jobs(dataset_name: str, assignees: list[tuple[User, User]]) -> None:
                 break
 
 
+# 1. Assignee und Reviewer definieren
+assignees = generate_user_pairs(users)
+iterator = itertools.cycle(assignees)
 for key, value in upload_classes.items():
     config = generate_dataset_config(
         classifications=[key],
@@ -181,6 +188,4 @@ for key, value in upload_classes.items():
         overwrite=True,
     )
 
-    # 1. Assignee und Reviewer definieren
-    assignees = generate_user_pairs(users)
-    create_jobs(dataset_name, assignees)
+    create_jobs(dataset_name, iterator)
