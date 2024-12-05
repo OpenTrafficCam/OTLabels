@@ -29,7 +29,7 @@ from OTLabels.users import load_users
 setup_logger()
 LOCAL_DATA_PATH: Path = Path("/Users/larsbriem/platomo/data/OTLabels/data_mio_svz")
 
-OTLABELS_PROJECT_ID = 24
+OTLABELS_PROJECT_ID = 87
 CVAT_URL = "https://label.opentrafficcam.org/"
 dataset_prefix = "SVZ"
 project_name = f"{dataset_prefix}-{SampleType.CORRECT_CLASSIFICATION}"

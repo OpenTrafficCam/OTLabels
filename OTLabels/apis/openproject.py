@@ -1,6 +1,10 @@
 import requests
 from annotate.pre_annotate import User
 
+STATUS_TO_BE_ANNOTATED = 23
+
+TYPE_ANNOTATION: int = 30
+
 
 class OpenProject:
     _api_key: str
@@ -32,6 +36,8 @@ class OpenProject:
                 "raw": content,
             },
             "_links": {
+                "type": {"href": f"/api/v3/types/{TYPE_ANNOTATION}"},
+                "status": {"href": f"/api/v3/statuses/{STATUS_TO_BE_ANNOTATED}"},
                 "assignee": {"href": f"/api/v3/users/{assignee_id}"},
                 "responsible": {"href": f"/api/v3/users/{assignee_id}"},
                 "customField5": {"href": f"/api/v3/users/{reviewer_id}"},
@@ -55,4 +61,4 @@ class OpenProject:
         for element in elements:
             if element["_type"] == "User" and element["login"] == user:
                 return element["id"]
-        raise ValueError("User not found")
+        raise ValueError(f"User {user} not found")
