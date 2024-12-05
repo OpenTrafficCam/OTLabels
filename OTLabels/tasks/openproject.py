@@ -32,12 +32,12 @@ class CreateWorkPackages:
 
 {concatenate_urls}
 
-# Status
+# Statuswechsel
 
-*   [ ] Annotation
-*   [ ] Review
-*   [ ] Supervised
-*   [ ] Completed
+*   in annotation zu to be reviewed: Zugewiesen auf Reviewer setzen
+*   in review zu to be fixed: Zugewiesen auf Verantwortlichen setzen
+*   fixing zu close: Nichts weiteres
+*   fixing zu to be supervised: Zugewiesen auf Lars setzen
 
 # Kommentare
 
