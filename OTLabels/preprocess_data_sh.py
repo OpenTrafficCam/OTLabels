@@ -20,7 +20,7 @@ importer = ImportImages(
 importer.initial_import(
     import_labels=True,
     launch_app=True,
-    name="mioVision_SH",
+    dataset_name="mioVision_SH",
     overwrite=True,
 )
 
@@ -32,6 +32,8 @@ cvat = CVAT(
 # for i in range(0, 5):
 cvat.export_data(
     annotation_key="SH_samples_MioVision",
+    task_assignee="",
+    job_assignees=[],
     # samples=1000,
     segment_size=100,
     # exclude_labels=("bicyclist", "motorcyclist"),
