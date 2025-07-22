@@ -1,17 +1,32 @@
 """Export pre-labelled image data to CVAT"""
 
 import json
+from dataclasses import dataclass
 
 import fiftyone
-from fiftyone import ViewField
+from fiftyone import Dataset, ViewField
+from fiftyone.core.annotation import AnnotationResults
+
+
+@dataclass
+class CvatTask:
+    id: int
+    jobs: list[int]
+    cvat_url: str
+
+    def job_urls(self) -> list[str]:
+        return [
+            f"https://label.opentrafficcam.org/tasks/{self.id}/jobs/{job}"
+            for job in self.jobs
+        ]
 
 
 class CVAT:
     def __init__(
         self,
         url: str,
-        security_file: str = "OTLabels/config/security.json",
-        organization_name: str = "OpenTrafficCam",
+        security_file: str = "config/security.json",
+        organization_name: str = "platomo",
         project_name: str = "",
         class_file: str = "",
     ):
@@ -38,19 +53,20 @@ class CVAT:
     def export_data(
         self,
         annotation_key: str,
+        task_assignee: str,
+        job_assignees: list,
         label_field: str = "pre_annotation",
         samples: int = 0,
         exclude_labels: tuple = (),
         segment_size: int = 25,
-        task_assignee: str = "armin",
-        job_assignees: list = [""],
+        task_size: int = 500,
         dataset_name: str = "OTLabels",
         include_classes: tuple = (),
         overwrite_annotation: bool = False,
         keep_samples: bool = True,
         set_status: bool = True,
-    ) -> None:
-        dataset = fiftyone.load_dataset(dataset_name)
+    ) -> list[CvatTask]:
+        dataset: Dataset = fiftyone.load_dataset(dataset_name)
 
         runs = dataset.list_annotation_runs()
 
@@ -84,11 +100,12 @@ class CVAT:
                 print("WARNING: Number of samples is larger than number of images!")
 
         if len(dataset_filtered) > 0:
-            dataset_filtered.annotate(
+            annotation_results: AnnotationResults = dataset_filtered.annotate(
                 anno_key=annotation_key,
                 label_field=label_field,
                 classes=self.classes,
                 label_type="detections",
+                task_size=task_size,
                 segment_size=segment_size,
                 task_assignee=task_assignee,
                 job_assignees=job_assignees,
@@ -96,15 +113,21 @@ class CVAT:
                 password=self.password,
                 url=self.url,
                 project_name=self.project_name,
+                backend="cvat",
                 headers={"X-Organization": self.organization_name},
             )
             print("INFO: Set status to 'in annotation' for selected images.")
 
             if set_status:
                 dataset_filtered = self.set_status(dataset_filtered, "in annotation")
+            return self.convert_to_tasks(annotation_results.job_ids)
 
         else:
             print("ERROR: No images to annotate! Please set your filters correctly.")
+            return []
+
+    def convert_to_tasks(self, job_ids: dict) -> list[CvatTask]:
+        return [CvatTask(task_id, jobs, self.url) for task_id, jobs in job_ids.items()]
 
     # TODO: set status when reimported
     def import_data(
